@@ -1,4 +1,4 @@
-// Stream.js - YouTube 24/7 Stream Management
+// Stream.js - YouTube 24/7 Stream Management (localStorage version)
 class YouTubeStream {
     constructor() {
         this.player = null;
@@ -6,11 +6,10 @@ class YouTubeStream {
         this.currentVideo = null;
         this.playlist = [];
         this.syncInterval = null;
-        this.firebase = null;
-        this.db = null;
+        this.streamManager = null;
         
-        // Initialize Firebase (you'll need to add your config)
-        this.initFirebase();
+        // Initialize localStorage stream manager
+        this.initLocalStorage();
         
         // Bind methods
         this.onPlayerReady = this.onPlayerReady.bind(this);
@@ -19,32 +18,62 @@ class YouTubeStream {
         
         // Initialize UI
         this.initUI();
+        
+        // Listen for storage changes (sync across tabs)
+        this.initStorageListener();
     }
 
-    initFirebase() {
-        // Firebase Configuration - matches admin panel
-        const firebaseConfig = {
-            apiKey: "AIzaSyBiwWy-J_C83MWeD88ZODIw2H6r2suUPTY",
-            authDomain: "fpt-radio.firebaseapp.com",
-            databaseURL: "https://fpt-radio-default-rtdb.firebaseio.com",
-            projectId: "fpt-radio",
-            storageBucket: "fpt-radio.firebasestorage.app",
-            messagingSenderId: "121288710296",
-            appId: "1:121288710296:web:041addd1c3a91f2c8f58ed"
-        };
-
-        try {
-            // Initialize Firebase
-            firebase.initializeApp(firebaseConfig);
-            this.db = firebase.firestore();
-            console.log('Firebase initialized successfully');
+    initLocalStorage() {
+        // Load the local stream manager
+        if (typeof LocalStreamManager !== 'undefined') {
+            this.streamManager = new LocalStreamManager();
+            console.log('LocalStreamManager initialized successfully');
             
-            // Start listening for stream data
-            this.listenForStreamUpdates();
-        } catch (error) {
-            console.error('Firebase initialization failed:', error);
-            this.showError('Failed to connect to stream service');
+            // Load initial data
+            this.loadStreamData();
+        } else {
+            console.error('LocalStreamManager not found - make sure local-stream.js is loaded');
+            this.showError('Stream manager not available');
         }
+    }
+
+    initStorageListener() {
+        // Listen for storage events from other tabs or admin panel
+        window.addEventListener('streamUpdate', (event) => {
+            console.log('Stream update received:', event.detail);
+            
+            if (event.detail.type === 'currentVideo') {
+                this.handleStreamUpdate(event.detail.data);
+            } else if (event.detail.type === 'playlist') {
+                this.playlist = event.detail.data;
+                console.log('Playlist updated:', this.playlist.length, 'videos');
+            }
+        });
+
+        // Also listen for localStorage changes from other tabs
+        window.addEventListener('storage', (event) => {
+            if (event.key && event.key.startsWith('phoenixStream_')) {
+                console.log('Storage changed:', event.key);
+                this.loadStreamData();
+            }
+        });
+    }
+
+    loadStreamData() {
+        if (!this.streamManager) return;
+
+        // Load current video
+        const currentVideo = this.streamManager.getCurrentVideo();
+        if (currentVideo) {
+            this.handleStreamUpdate(currentVideo);
+        } else {
+            console.log('No current stream data found');
+            this.showError('No stream currently active');
+        }
+
+        // Load playlist
+        this.playlist = this.streamManager.getPlaylist();
+        console.log('Playlist loaded:', this.playlist.length, 'videos');
     }
 
     initUI() {
@@ -68,40 +97,9 @@ class YouTubeStream {
 
         // Set initial volume
         this.elements.volumeSlider.value = 50;
-    }
-
-    listenForStreamUpdates() {
-        if (!this.db) {
-            console.error('Database not initialized');
-            return;
-        }
-
-        // Listen for current video changes
-        this.db.collection('stream').doc('current').onSnapshot((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                this.handleStreamUpdate(data);
-            } else {
-                console.log('No current stream data found');
-                this.showError('No stream currently active');
-            }
-        }, (error) => {
-            console.error('Error listening for stream updates:', error);
-            this.showError('Connection to stream lost');
-        });
-
-        // Listen for playlist changes
-        this.db.collection('stream').doc('playlist').onSnapshot((doc) => {
-            if (doc.exists) {
-                const data = doc.data();
-                this.playlist = data.videos || [];
-                console.log('Playlist updated:', this.playlist.length, 'videos');
-            } else {
-                this.playlist = [];
-            }
-        }, (error) => {
-            console.error('Error listening for playlist updates:', error);
-        });
+        
+        // Show loading initially
+        this.showLoading();
     }
 
     handleStreamUpdate(streamData) {
@@ -258,20 +256,14 @@ class YouTubeStream {
 
     async playNextVideo(video) {
         try {
-            const currentVideo = {
-                videoId: video.videoId,
-                title: video.title,
-                startTime: Date.now()
-            };
-
-            // Update Firebase (this will trigger sync across all viewers)
-            if (this.db) {
-                await this.db.collection('stream').doc('current').set(currentVideo);
+            // Update localStorage (this will trigger sync across all viewers)
+            if (this.streamManager) {
+                const currentVideo = this.streamManager.setCurrentVideo(video);
+                
+                // Update local state
+                this.currentVideo = currentVideo;
+                this.updateVideoInfo();
             }
-            
-            // Update local state
-            this.currentVideo = currentVideo;
-            this.updateVideoInfo();
             
         } catch (error) {
             console.error('Error playing next video:', error);

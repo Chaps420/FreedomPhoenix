@@ -388,6 +388,9 @@
         </div>
     </div>
 
+    <!-- Local Stream Manager -->
+    <script src="local-stream.js"></script>
+    
     <script type="module">
         class AdminPanel {
             constructor() {
@@ -395,6 +398,7 @@
                 this.requests = [];
                 this.playlist = [];
                 this.currentVideo = null;
+                this.streamManager = null;
                 this.ADMIN_USERNAME = 'admin';
                 this.ADMIN_PASSWORD = 'phoenix589';
                 this.YOUTUBE_API_KEY = ''; // Add your YouTube API key here
@@ -402,8 +406,28 @@
             }
 
             async init() {
+                // Initialize localStorage stream manager
+                this.initLocalStorage();
                 await this.initializeFirebase();
                 this.bindEvents();
+            }
+
+            initLocalStorage() {
+                // Initialize stream manager for localStorage
+                if (typeof LocalStreamManager !== 'undefined') {
+                    this.streamManager = new LocalStreamManager();
+                    console.log('LocalStreamManager initialized for admin');
+                } else {
+                    console.warn('LocalStreamManager not found - loading from CDN');
+                    // Load local-stream.js if not already loaded
+                    const script = document.createElement('script');
+                    script.src = 'local-stream.js';
+                    script.onload = () => {
+                        this.streamManager = new LocalStreamManager();
+                        console.log('LocalStreamManager loaded and initialized');
+                    };
+                    document.head.appendChild(script);
+                }
             }
 
             async initializeFirebase() {
@@ -655,35 +679,28 @@
             }
 
             async loadStreamData() {
+                if (!this.streamManager) {
+                    console.warn('Stream manager not initialized yet');
+                    return;
+                }
+
                 try {
-                    // Load current video
-                    const { getFirestore, doc, getDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
-                    this.firestore = getFirestore(this.app);
-                    this.doc = doc;
-                    this.getDoc = getDoc;
-                    this.onSnapshot = onSnapshot;
+                    // Load current video from localStorage
+                    this.currentVideo = this.streamManager.getCurrentVideo();
+                    this.updateCurrentVideoDisplay();
+                    
+                    if (this.currentVideo) {
+                        document.getElementById('streamStatus').textContent = 'Live';
+                        document.getElementById('streamStatus').style.color = '#2ecc71';
+                    } else {
+                        document.getElementById('streamStatus').textContent = 'Offline';
+                        document.getElementById('streamStatus').style.color = '#e74c3c';
+                    }
 
-                    // Listen for current video changes
-                    this.onSnapshot(this.doc(this.firestore, 'stream', 'current'), (doc) => {
-                        if (doc.exists()) {
-                            this.currentVideo = doc.data();
-                            this.updateCurrentVideoDisplay();
-                            document.getElementById('streamStatus').textContent = 'Live';
-                            document.getElementById('streamStatus').style.color = '#2ecc71';
-                        } else {
-                            document.getElementById('streamStatus').textContent = 'Offline';
-                            document.getElementById('streamStatus').style.color = '#e74c3c';
-                        }
-                    });
-
-                    // Listen for playlist changes
-                    this.onSnapshot(this.doc(this.firestore, 'stream', 'playlist'), (doc) => {
-                        if (doc.exists()) {
-                            this.playlist = doc.data().videos || [];
-                            this.updatePlaylistDisplay();
-                            document.getElementById('playlistCount').textContent = this.playlist.length;
-                        }
-                    });
+                    // Load playlist from localStorage
+                    this.playlist = this.streamManager.getPlaylist();
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = this.playlist.length;
 
                 } catch (error) {
                     console.error('Error loading stream data:', error);
@@ -782,9 +799,13 @@
                     const videoId = this.extractVideoId(url);
                     const videoInfo = await this.getVideoInfo(videoId);
                     
-                    // Add to playlist
-                    this.playlist.push(videoInfo);
-                    await this.savePlaylist();
+                    // Add to playlist using stream manager
+                    if (this.streamManager) {
+                        this.streamManager.addToPlaylist(videoInfo);
+                        this.playlist = this.streamManager.getPlaylist();
+                        this.updatePlaylistDisplay();
+                        document.getElementById('playlistCount').textContent = this.playlist.length;
+                    }
                     
                     document.getElementById('videoUrl').value = '';
                     this.showMessage('Video added to playlist!', 'success');
@@ -805,15 +826,14 @@
                     const videoId = this.extractVideoId(url);
                     const videoInfo = await this.getVideoInfo(videoId);
                     
-                    // Set as current video
-                    const currentVideo = {
-                        videoId: videoInfo.videoId,
-                        title: videoInfo.title,
-                        startTime: Date.now()
-                    };
-
-                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
-                    await setDoc(this.doc(this.firestore, 'stream', 'current'), currentVideo);
+                    // Set as current video using stream manager
+                    if (this.streamManager) {
+                        this.currentVideo = this.streamManager.setCurrentVideo(videoInfo);
+                        this.updateCurrentVideoDisplay();
+                        
+                        document.getElementById('streamStatus').textContent = 'Live';
+                        document.getElementById('streamStatus').style.color = '#2ecc71';
+                    }
                     
                     document.getElementById('videoUrl').value = '';
                     this.showMessage('Video started playing!', 'success');
@@ -831,14 +851,15 @@
 
                 try {
                     const video = this.playlist[index];
-                    const currentVideo = {
-                        videoId: video.videoId,
-                        title: video.title,
-                        startTime: Date.now()
-                    };
-
-                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
-                    await setDoc(this.doc(this.firestore, 'stream', 'current'), currentVideo);
+                    
+                    // Set as current video using stream manager
+                    if (this.streamManager) {
+                        this.currentVideo = this.streamManager.setCurrentVideo(video);
+                        this.updateCurrentVideoDisplay();
+                        
+                        document.getElementById('streamStatus').textContent = 'Live';
+                        document.getElementById('streamStatus').style.color = '#2ecc71';
+                    }
                     
                     this.showMessage('Video started playing!', 'success');
                 } catch (error) {
@@ -853,19 +874,13 @@
                     return;
                 }
 
-                this.playlist.splice(index, 1);
-                await this.savePlaylist();
-                this.showMessage('Video removed from playlist', 'success');
-            }
-
-            async savePlaylist() {
-                try {
-                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
-                    await setDoc(this.doc(this.firestore, 'stream', 'playlist'), { videos: this.playlist });
-                } catch (error) {
-                    console.error('Error saving playlist:', error);
-                    this.showMessage('Error saving playlist: ' + error.message, 'error');
+                if (this.streamManager) {
+                    this.playlist = this.streamManager.removeFromPlaylist(index);
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = this.playlist.length;
                 }
+                
+                this.showMessage('Video removed from playlist', 'success');
             }
 
             async shufflePlaylist() {
@@ -874,12 +889,11 @@
                     return;
                 }
 
-                for (let i = this.playlist.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+                if (this.streamManager) {
+                    this.playlist = this.streamManager.shufflePlaylist();
+                    this.updatePlaylistDisplay();
                 }
 
-                await this.savePlaylist();
                 this.showMessage('Playlist shuffled!', 'success');
             }
 
@@ -888,8 +902,13 @@
                     return;
                 }
 
-                this.playlist = [];
-                await this.savePlaylist();
+                if (this.streamManager) {
+                    this.streamManager.savePlaylist([]);
+                    this.playlist = [];
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = 0;
+                }
+
                 this.showMessage('Playlist cleared!', 'success');
             }
 
@@ -911,6 +930,11 @@
 
             async testStream() {
                 try {
+                    if (!this.streamManager) {
+                        this.showMessage('Stream manager not initialized', 'error');
+                        return;
+                    }
+
                     // Add some test videos to the playlist
                     const testVideos = [
                         { videoId: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up', duration: '3:33' },
@@ -919,18 +943,17 @@
                     ];
 
                     // Clear existing playlist and add test videos
-                    this.playlist = [...testVideos];
-                    await this.savePlaylist();
+                    this.streamManager.savePlaylist(testVideos);
+                    this.playlist = testVideos;
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = this.playlist.length;
 
                     // Start playing the first video
-                    const firstVideo = {
-                        videoId: testVideos[0].videoId,
-                        title: testVideos[0].title,
-                        startTime: Date.now()
-                    };
-
-                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
-                    await setDoc(this.doc(this.firestore, 'stream', 'current'), firstVideo);
+                    this.currentVideo = this.streamManager.setCurrentVideo(testVideos[0]);
+                    this.updateCurrentVideoDisplay();
+                    
+                    document.getElementById('streamStatus').textContent = 'Live';
+                    document.getElementById('streamStatus').style.color = '#2ecc71';
 
                     this.showMessage('Test stream started! Check the stream page.', 'success');
                 } catch (error) {
