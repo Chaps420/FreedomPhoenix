@@ -254,38 +254,127 @@
                 </button>
             </div>
 
+            <!-- Stream Management Tab Navigation -->
+            <div style="margin-bottom: 20px; border-bottom: 2px solid rgba(255, 255, 255, 0.1);">
+                <button id="queueTab" class="btn btn-primary" style="border-radius: 0; border-bottom: 3px solid #ff6b35;">
+                    <i class="fas fa-list"></i> Song Queue
+                </button>
+                <button id="streamTab" class="btn" style="border-radius: 0; background: transparent; color: #ccc;">
+                    <i class="fas fa-play-circle"></i> 24/7 Stream
+                </button>
+            </div>
+
             <div id="messageContainer"></div>
 
-            <!-- Stats -->
-            <div class="queue-stats">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalCount">0</div>
-                    <div>Total Requests</div>
+            <!-- Queue Management Section -->
+            <div id="queueSection">
+                <!-- Stats -->
+                <div class="queue-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div>Total Requests</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="recentCount">0</div>
+                        <div>Recent (24h)</div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="recentCount">0</div>
-                    <div>Recent (24h)</div>
+
+                <!-- Queue Table -->
+                <div class="queue-table">
+                    <div class="table-header">
+                        <div>#</div>
+                        <div>Song Info</div>
+                        <div>Requested</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="queueItems"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="refreshBtn" class="btn btn-primary">
+                        <i class="fas fa-refresh"></i> Refresh Queue
+                    </button>
+                    <a href="/" class="btn btn-success">
+                        <i class="fas fa-home"></i> Back to Site
+                    </a>
                 </div>
             </div>
 
-            <!-- Queue Table -->
-            <div class="queue-table">
-                <div class="table-header">
-                    <div>#</div>
-                    <div>Song Info</div>
-                    <div>Requested</div>
-                    <div>Actions</div>
+            <!-- Stream Management Section -->
+            <div id="streamSection" class="hidden">
+                <!-- Stream Stats -->
+                <div class="queue-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="streamStatus">Offline</div>
+                        <div>Stream Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="playlistCount">0</div>
+                        <div>Videos in Playlist</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="currentPosition">--:--</div>
+                        <div>Current Position</div>
+                    </div>
                 </div>
-                <div id="queueItems"></div>
-            </div>
 
-            <div style="text-align: center; margin-top: 20px;">
-                <button id="refreshBtn" class="btn btn-primary">
-                    <i class="fas fa-refresh"></i> Refresh Queue
-                </button>
-                <a href="/" class="btn btn-success">
-                    <i class="fas fa-home"></i> Back to Site
-                </a>
+                <!-- Current Video -->
+                <div class="queue-table" style="margin-bottom: 20px;">
+                    <div class="table-header">
+                        <div colspan="4">Currently Playing</div>
+                    </div>
+                    <div id="currentVideoDisplay" style="padding: 20px; text-align: center; color: #ccc;">
+                        No video currently playing
+                    </div>
+                </div>
+
+                <!-- Add Video Form -->
+                <div class="queue-table" style="margin-bottom: 20px;">
+                    <div class="table-header">
+                        <div>Add Video to Stream</div>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div class="form-group">
+                            <label for="videoUrl">YouTube Video URL or ID:</label>
+                            <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=... or just the video ID" style="margin-bottom: 10px;">
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="addVideoBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Video
+                            </button>
+                            <button id="playNowBtn" class="btn btn-success">
+                                <i class="fas fa-play"></i> Play Now
+                            </button>
+                            <button id="addPlaylistBtn" class="btn" style="background: #8e44ad; color: white;">
+                                <i class="fas fa-list"></i> Add Playlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Playlist Management -->
+                <div class="queue-table">
+                    <div class="table-header">
+                        <div>#</div>
+                        <div>Video Title</div>
+                        <div>Duration</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="playlistItems" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="shufflePlaylistBtn" class="btn" style="background: #9b59b6; color: white;">
+                        <i class="fas fa-random"></i> Shuffle Playlist
+                    </button>
+                    <button id="clearPlaylistBtn" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Clear Playlist
+                    </button>
+                    <a href="stream.html" target="_blank" class="btn btn-success">
+                        <i class="fas fa-external-link-alt"></i> View Stream
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -295,8 +384,11 @@
             constructor() {
                 this.isAuthenticated = false;
                 this.requests = [];
+                this.playlist = [];
+                this.currentVideo = null;
                 this.ADMIN_USERNAME = 'admin';
                 this.ADMIN_PASSWORD = 'phoenix589';
+                this.YOUTUBE_API_KEY = ''; // Add your YouTube API key here
                 this.init();
             }
 
@@ -348,6 +440,36 @@
 
                 document.getElementById('refreshBtn').addEventListener('click', () => {
                     this.refreshQueue();
+                });
+
+                // Tab switching
+                document.getElementById('queueTab').addEventListener('click', () => {
+                    this.switchTab('queue');
+                });
+
+                document.getElementById('streamTab').addEventListener('click', () => {
+                    this.switchTab('stream');
+                });
+
+                // Stream management events
+                document.getElementById('addVideoBtn').addEventListener('click', () => {
+                    this.addVideoToPlaylist();
+                });
+
+                document.getElementById('playNowBtn').addEventListener('click', () => {
+                    this.playVideoNow();
+                });
+
+                document.getElementById('addPlaylistBtn').addEventListener('click', () => {
+                    this.addPlaylistFromUrl();
+                });
+
+                document.getElementById('shufflePlaylistBtn').addEventListener('click', () => {
+                    this.shufflePlaylist();
+                });
+
+                document.getElementById('clearPlaylistBtn').addEventListener('click', () => {
+                    this.clearPlaylist();
                 });
             }
 
@@ -485,6 +607,293 @@
                 setTimeout(() => {
                     messageDiv.remove();
                 }, 5000);
+            }
+
+            // Stream Management Methods
+            switchTab(tab) {
+                const queueTab = document.getElementById('queueTab');
+                const streamTab = document.getElementById('streamTab');
+                const queueSection = document.getElementById('queueSection');
+                const streamSection = document.getElementById('streamSection');
+
+                if (tab === 'queue') {
+                    queueTab.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
+                    queueTab.style.color = 'white';
+                    queueTab.style.borderBottom = '3px solid #ff6b35';
+                    streamTab.style.background = 'transparent';
+                    streamTab.style.color = '#ccc';
+                    streamTab.style.borderBottom = 'none';
+
+                    queueSection.classList.remove('hidden');
+                    streamSection.classList.add('hidden');
+                } else {
+                    streamTab.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
+                    streamTab.style.color = 'white';
+                    streamTab.style.borderBottom = '3px solid #ff6b35';
+                    queueTab.style.background = 'transparent';
+                    queueTab.style.color = '#ccc';
+                    queueTab.style.borderBottom = 'none';
+
+                    queueSection.classList.add('hidden');
+                    streamSection.classList.remove('hidden');
+                    
+                    this.loadStreamData();
+                }
+            }
+
+            async loadStreamData() {
+                try {
+                    // Load current video
+                    const { getFirestore, doc, getDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+                    this.firestore = getFirestore(this.app);
+                    this.doc = doc;
+                    this.getDoc = getDoc;
+                    this.onSnapshot = onSnapshot;
+
+                    // Listen for current video changes
+                    this.onSnapshot(this.doc(this.firestore, 'stream', 'current'), (doc) => {
+                        if (doc.exists()) {
+                            this.currentVideo = doc.data();
+                            this.updateCurrentVideoDisplay();
+                            document.getElementById('streamStatus').textContent = 'Live';
+                            document.getElementById('streamStatus').style.color = '#2ecc71';
+                        } else {
+                            document.getElementById('streamStatus').textContent = 'Offline';
+                            document.getElementById('streamStatus').style.color = '#e74c3c';
+                        }
+                    });
+
+                    // Listen for playlist changes
+                    this.onSnapshot(this.doc(this.firestore, 'stream', 'playlist'), (doc) => {
+                        if (doc.exists()) {
+                            this.playlist = doc.data().videos || [];
+                            this.updatePlaylistDisplay();
+                            document.getElementById('playlistCount').textContent = this.playlist.length;
+                        }
+                    });
+
+                } catch (error) {
+                    console.error('Error loading stream data:', error);
+                    this.showMessage('Error loading stream data: ' + error.message, 'error');
+                }
+            }
+
+            updateCurrentVideoDisplay() {
+                const display = document.getElementById('currentVideoDisplay');
+                if (!this.currentVideo) {
+                    display.innerHTML = 'No video currently playing';
+                    document.getElementById('currentPosition').textContent = '--:--';
+                    return;
+                }
+
+                const elapsed = this.currentVideo.startTime ? 
+                    Math.floor((Date.now() - this.currentVideo.startTime) / 1000) : 0;
+                
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('currentPosition').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                display.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="https://img.youtube.com/vi/${this.currentVideo.videoId}/mqdefault.jpg" 
+                             style="width: 120px; height: 68px; border-radius: 8px;" />
+                        <div style="text-align: left;">
+                            <h3 style="color: #ff6b35; margin-bottom: 5px;">${this.currentVideo.title}</h3>
+                            <p style="color: #ccc; margin-bottom: 10px;">Started: ${new Date(this.currentVideo.startTime).toLocaleString()}</p>
+                            <a href="https://www.youtube.com/watch?v=${this.currentVideo.videoId}" target="_blank" style="color: #ff6b35;">
+                                <i class="fas fa-external-link-alt"></i> View on YouTube
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            updatePlaylistDisplay() {
+                const container = document.getElementById('playlistItems');
+                container.innerHTML = '';
+
+                if (this.playlist.length === 0) {
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #ccc;">No videos in playlist</div>';
+                    return;
+                }
+
+                this.playlist.forEach((video, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'queue-item';
+                    item.innerHTML = `
+                        <div>${index + 1}</div>
+                        <div class="song-info">
+                            <div class="song-title">${this.escapeHtml(video.title)}</div>
+                            <a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" class="youtube-link">
+                                <i class="fas fa-external-link-alt"></i> View on YouTube
+                            </a>
+                        </div>
+                        <div>${video.duration || 'Unknown'}</div>
+                        <div class="actions">
+                            <button class="btn btn-success" onclick="adminPanel.playVideoAtIndex(${index})">
+                                <i class="fas fa-play"></i> Play
+                            </button>
+                            <button class="btn btn-danger" onclick="adminPanel.removeVideoFromPlaylist(${index})">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+
+            extractVideoId(url) {
+                const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+                const match = url.match(regex);
+                return match ? match[1] : url; // Return the ID if found, otherwise assume it's already an ID
+            }
+
+            async getVideoInfo(videoId) {
+                // This is a simplified version - you'd want to use YouTube API for full info
+                return {
+                    videoId: videoId,
+                    title: `Video ${videoId}`, // Placeholder - would get from YouTube API
+                    duration: 'Unknown' // Placeholder - would get from YouTube API
+                };
+            }
+
+            async addVideoToPlaylist() {
+                const url = document.getElementById('videoUrl').value.trim();
+                if (!url) {
+                    this.showMessage('Please enter a YouTube URL or video ID', 'error');
+                    return;
+                }
+
+                try {
+                    const videoId = this.extractVideoId(url);
+                    const videoInfo = await this.getVideoInfo(videoId);
+                    
+                    // Add to playlist
+                    this.playlist.push(videoInfo);
+                    await this.savePlaylist();
+                    
+                    document.getElementById('videoUrl').value = '';
+                    this.showMessage('Video added to playlist!', 'success');
+                } catch (error) {
+                    console.error('Error adding video:', error);
+                    this.showMessage('Error adding video: ' + error.message, 'error');
+                }
+            }
+
+            async playVideoNow() {
+                const url = document.getElementById('videoUrl').value.trim();
+                if (!url) {
+                    this.showMessage('Please enter a YouTube URL or video ID', 'error');
+                    return;
+                }
+
+                try {
+                    const videoId = this.extractVideoId(url);
+                    const videoInfo = await this.getVideoInfo(videoId);
+                    
+                    // Set as current video
+                    const currentVideo = {
+                        videoId: videoInfo.videoId,
+                        title: videoInfo.title,
+                        startTime: Date.now()
+                    };
+
+                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+                    await setDoc(this.doc(this.firestore, 'stream', 'current'), currentVideo);
+                    
+                    document.getElementById('videoUrl').value = '';
+                    this.showMessage('Video started playing!', 'success');
+                } catch (error) {
+                    console.error('Error starting video:', error);
+                    this.showMessage('Error starting video: ' + error.message, 'error');
+                }
+            }
+
+            async playVideoAtIndex(index) {
+                if (index < 0 || index >= this.playlist.length) {
+                    this.showMessage('Invalid video index', 'error');
+                    return;
+                }
+
+                try {
+                    const video = this.playlist[index];
+                    const currentVideo = {
+                        videoId: video.videoId,
+                        title: video.title,
+                        startTime: Date.now()
+                    };
+
+                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+                    await setDoc(this.doc(this.firestore, 'stream', 'current'), currentVideo);
+                    
+                    this.showMessage('Video started playing!', 'success');
+                } catch (error) {
+                    console.error('Error starting video:', error);
+                    this.showMessage('Error starting video: ' + error.message, 'error');
+                }
+            }
+
+            async removeVideoFromPlaylist(index) {
+                if (index < 0 || index >= this.playlist.length) {
+                    this.showMessage('Invalid video index', 'error');
+                    return;
+                }
+
+                this.playlist.splice(index, 1);
+                await this.savePlaylist();
+                this.showMessage('Video removed from playlist', 'success');
+            }
+
+            async savePlaylist() {
+                try {
+                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+                    await setDoc(this.doc(this.firestore, 'stream', 'playlist'), { videos: this.playlist });
+                } catch (error) {
+                    console.error('Error saving playlist:', error);
+                    this.showMessage('Error saving playlist: ' + error.message, 'error');
+                }
+            }
+
+            async shufflePlaylist() {
+                if (this.playlist.length < 2) {
+                    this.showMessage('Need at least 2 videos to shuffle', 'error');
+                    return;
+                }
+
+                for (let i = this.playlist.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.playlist[i], this.playlist[j]] = [this.playlist[j], this.playlist[i]];
+                }
+
+                await this.savePlaylist();
+                this.showMessage('Playlist shuffled!', 'success');
+            }
+
+            async clearPlaylist() {
+                if (!confirm('Are you sure you want to clear the entire playlist?')) {
+                    return;
+                }
+
+                this.playlist = [];
+                await this.savePlaylist();
+                this.showMessage('Playlist cleared!', 'success');
+            }
+
+            async addPlaylistFromUrl() {
+                const url = document.getElementById('videoUrl').value.trim();
+                if (!url) {
+                    this.showMessage('Please enter a YouTube playlist URL', 'error');
+                    return;
+                }
+
+                if (!url.includes('playlist')) {
+                    this.showMessage('Please enter a valid playlist URL', 'error');
+                    return;
+                }
+
+                this.showMessage('Playlist import feature coming soon!', 'info');
+                // TODO: Implement playlist import using YouTube API
             }
         }
 
