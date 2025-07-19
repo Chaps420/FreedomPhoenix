@@ -159,10 +159,30 @@
         .song-title {
             font-weight: bold;
             color: #ff6b35;
-            margin-bottom: 5px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        .compact-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .compact-info .song-title {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .compact-info .requester {
+            color: #ccc;
+        }
+
+        .compact-info .timestamp {
+            color: #999;
+            font-size: 0.85rem;
         }
 
         .requester-name {
@@ -183,6 +203,22 @@
         .actions {
             display: flex;
             gap: 10px;
+        }
+
+        .select-checkbox {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .bulk-actions {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .recent-requests {
+            margin-bottom: 30px;
         }
 
         .hidden {
@@ -286,12 +322,32 @@
                     </div>
                 </div>
 
+                <!-- Recent Requests Section -->
+                <div class="recent-requests">
+                    <h3 style="margin-bottom: 15px;">
+                        <i class="fas fa-clock"></i> Recent Requests (Last 5)
+                    </h3>
+                    <div class="queue-table">
+                        <div id="recentItems" style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Queue Table -->
                 <div class="queue-table">
+                    <div class="bulk-actions">
+                        <input type="checkbox" id="selectAll" class="select-checkbox">
+                        <label for="selectAll" style="margin-left: 5px; cursor: pointer;">Select All</label>
+                        <button id="deleteSelected" class="btn btn-danger" style="margin-left: 15px;" disabled>
+                            <i class="fas fa-trash"></i> Delete Selected
+                        </button>
+                    </div>
                     <div class="table-header">
+                        <div style="width: 40px;">
+                            <i class="fas fa-check"></i>
+                        </div>
                         <div>#</div>
-                        <div>Song Info</div>
-                        <div>Requested</div>
+                        <div>Song - Requested by - Time</div>
                         <div>Actions</div>
                     </div>
                     <div id="queueItems"></div>
@@ -654,41 +710,75 @@
 
             renderQueue() {
                 const container = document.getElementById('queueItems');
+                const recentContainer = document.getElementById('recentItems');
                 container.innerHTML = '';
+                recentContainer.innerHTML = '';
 
                 if (this.requests.length === 0) {
                     container.innerHTML = '<div style="padding: 20px; text-align: center; color: #ccc;">No requests in queue</div>';
+                    recentContainer.innerHTML = '<div style="padding: 10px; text-align: center; color: #ccc;">No recent requests</div>';
                     return;
                 }
 
-                // Sort by timestamp
+                // Sort by timestamp (newest first for recent, oldest first for queue)
                 const sortedRequests = [...this.requests].sort((a, b) => a.timestamp - b.timestamp);
+                const recentRequests = [...this.requests]
+                    .sort((a, b) => b.timestamp - a.timestamp)
+                    .slice(0, 5);
 
+                // Render recent requests (compact, no checkboxes)
+                recentRequests.forEach((request) => {
+                    const item = document.createElement('div');
+                    item.className = 'queue-item';
+                    item.style.padding = '8px 15px';
+                    
+                    const timeString = new Date(request.timestamp).toLocaleTimeString();
+                    const dateString = new Date(request.timestamp).toLocaleDateString();
+                    
+                    item.innerHTML = `
+                        <div class="compact-info">
+                            <span class="song-title">${this.escapeHtml(request.title || 'Unknown Song')}</span>
+                            <span class="requester">by ${this.escapeHtml(request.requesterName || 'Anonymous')}</span>
+                            <span class="timestamp">${timeString} ${dateString}</span>
+                        </div>
+                    `;
+                    
+                    recentContainer.appendChild(item);
+                });
+
+                // Render full queue with checkboxes
                 sortedRequests.forEach((request, index) => {
                     const item = document.createElement('div');
                     item.className = 'queue-item';
                     
-                    const timeString = new Date(request.timestamp).toLocaleString();
+                    const timeString = new Date(request.timestamp).toLocaleTimeString();
+                    const dateString = new Date(request.timestamp).toLocaleDateString();
                     
                     item.innerHTML = `
+                        <div style="width: 40px;">
+                            <input type="checkbox" class="song-checkbox select-checkbox" value="${request.id}">
+                        </div>
                         <div>${index + 1}</div>
-                        <div class="song-info">
-                            <div class="song-title">${this.escapeHtml(request.title || 'Unknown Song')}</div>
-                            <div class="requester-name">Requested by: ${this.escapeHtml(request.requesterName || 'Anonymous')}</div>
-                            <a href="${this.escapeHtml(request.url)}" target="_blank" class="youtube-link">
-                                <i class="fas fa-external-link-alt"></i> View Original
+                        <div class="compact-info">
+                            <span class="song-title">${this.escapeHtml(request.title || 'Unknown Song')}</span>
+                            <span class="requester">by ${this.escapeHtml(request.requesterName || 'Anonymous')}</span>
+                            <span class="timestamp">${timeString} ${dateString}</span>
+                            <a href="${this.escapeHtml(request.url)}" target="_blank" class="youtube-link" style="margin-left: 10px;">
+                                <i class="fas fa-external-link-alt"></i>
                             </a>
                         </div>
-                        <div>${timeString}</div>
                         <div class="actions">
                             <button class="btn btn-danger" onclick="adminPanel.deleteRequest('${request.id}')">
-                                <i class="fas fa-trash"></i> Delete
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     `;
                     
                     container.appendChild(item);
                 });
+
+                // Setup checkbox event listeners
+                this.setupCheckboxListeners();
             }
 
             async deleteRequest(requestId) {
@@ -702,6 +792,76 @@
                 } catch (error) {
                     console.error('Error deleting request:', error);
                     this.showMessage('Failed to delete request: ' + error.message, 'error');
+                }
+            }
+
+            setupCheckboxListeners() {
+                const selectAll = document.getElementById('selectAll');
+                const deleteSelected = document.getElementById('deleteSelected');
+                const checkboxes = document.querySelectorAll('.song-checkbox');
+
+                // Select all functionality
+                selectAll.addEventListener('change', (e) => {
+                    checkboxes.forEach(cb => {
+                        cb.checked = e.target.checked;
+                    });
+                    this.updateDeleteButtonState();
+                });
+
+                // Individual checkbox listeners
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', () => {
+                        this.updateDeleteButtonState();
+                        
+                        // Update select all checkbox state
+                        const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+                        const someChecked = Array.from(checkboxes).some(checkbox => checkbox.checked);
+                        
+                        selectAll.checked = allChecked;
+                        selectAll.indeterminate = someChecked && !allChecked;
+                    });
+                });
+
+                // Delete selected button
+                deleteSelected.addEventListener('click', () => {
+                    this.deleteSelectedRequests();
+                });
+            }
+
+            updateDeleteButtonState() {
+                const deleteSelected = document.getElementById('deleteSelected');
+                const checkedBoxes = document.querySelectorAll('.song-checkbox:checked');
+                deleteSelected.disabled = checkedBoxes.length === 0;
+                deleteSelected.innerHTML = `<i class="fas fa-trash"></i> Delete Selected (${checkedBoxes.length})`;
+            }
+
+            async deleteSelectedRequests() {
+                const checkedBoxes = document.querySelectorAll('.song-checkbox:checked');
+                const selectedIds = Array.from(checkedBoxes).map(cb => cb.value);
+                
+                if (selectedIds.length === 0) {
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to delete ${selectedIds.length} selected request(s)?`)) {
+                    return;
+                }
+
+                try {
+                    const deletePromises = selectedIds.map(id => 
+                        this.remove(this.ref(this.database, `songs/${id}`))
+                    );
+                    
+                    await Promise.all(deletePromises);
+                    this.showMessage(`Successfully deleted ${selectedIds.length} request(s)!`, 'success');
+                    
+                    // Reset select all checkbox
+                    document.getElementById('selectAll').checked = false;
+                    document.getElementById('selectAll').indeterminate = false;
+                    
+                } catch (error) {
+                    console.error('Error deleting selected requests:', error);
+                    this.showMessage('Failed to delete some requests: ' + error.message, 'error');
                 }
             }
 
