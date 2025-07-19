@@ -167,22 +167,53 @@
         .compact-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 5px;
             font-size: 0.9rem;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
-        .compact-info .song-title {
-            margin: 0;
+        .song-info-main {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .song-line {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .compact-info .song-title, .song-line .song-title {
+            color: #ff6b35;
+            font-weight: bold;
             font-size: 1rem;
+            flex-shrink: 0;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .compact-info .requester {
+        .compact-info .requester, .song-line .requester {
             color: #ccc;
+            flex-shrink: 0;
         }
 
-        .compact-info .timestamp {
+        .compact-info .timestamp, .song-line .timestamp {
             color: #999;
             font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .youtube-link {
+            color: #ff6b35;
+            text-decoration: none;
+            margin-left: 10px;
+            flex-shrink: 0;
         }
 
         .requester-name {
@@ -346,9 +377,9 @@
                         <div style="width: 40px;">
                             <i class="fas fa-check"></i>
                         </div>
-                        <div>#</div>
-                        <div>Song - Requested by - Time</div>
-                        <div>Actions</div>
+                        <div style="width: 30px; text-align: center;">#</div>
+                        <div>Song Title - Requested by - Time</div>
+                        <div style="width: 80px; text-align: center;">Actions</div>
                     </div>
                     <div id="queueItems"></div>
                 </div>
@@ -732,14 +763,33 @@
                     item.className = 'queue-item';
                     item.style.padding = '8px 15px';
                     
-                    const timeString = new Date(request.timestamp).toLocaleTimeString();
-                    const dateString = new Date(request.timestamp).toLocaleDateString();
+                    // Better timestamp handling
+                    let timeString = 'Unknown';
+                    let dateString = '';
+                    
+                    try {
+                        const timestamp = request.timestamp ? parseInt(request.timestamp) : Date.now();
+                        const date = new Date(timestamp);
+                        if (!isNaN(date.getTime())) {
+                            timeString = date.toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                hour12: true 
+                            });
+                            dateString = date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        }
+                    } catch (e) {
+                        console.log('Date parsing error:', e);
+                    }
                     
                     item.innerHTML = `
                         <div class="compact-info">
                             <span class="song-title">${this.escapeHtml(request.title || 'Unknown Song')}</span>
-                            <span class="requester">by ${this.escapeHtml(request.requesterName || 'Anonymous')}</span>
-                            <span class="timestamp">${timeString} ${dateString}</span>
+                            <span class="requester"> - by ${this.escapeHtml(request.requesterName || 'Anonymous')}</span>
+                            <span class="timestamp"> - ${timeString} ${dateString}</span>
                         </div>
                     `;
                     
@@ -751,21 +801,42 @@
                     const item = document.createElement('div');
                     item.className = 'queue-item';
                     
-                    const timeString = new Date(request.timestamp).toLocaleTimeString();
-                    const dateString = new Date(request.timestamp).toLocaleDateString();
+                    // Better timestamp handling
+                    let timeString = 'Unknown';
+                    let dateString = '';
+                    
+                    try {
+                        const timestamp = request.timestamp ? parseInt(request.timestamp) : Date.now();
+                        const date = new Date(timestamp);
+                        if (!isNaN(date.getTime())) {
+                            timeString = date.toLocaleTimeString('en-US', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                hour12: true 
+                            });
+                            dateString = date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        }
+                    } catch (e) {
+                        console.log('Date parsing error:', e);
+                    }
                     
                     item.innerHTML = `
                         <div style="width: 40px;">
                             <input type="checkbox" class="song-checkbox select-checkbox" value="${request.id}">
                         </div>
-                        <div>${index + 1}</div>
-                        <div class="compact-info">
-                            <span class="song-title">${this.escapeHtml(request.title || 'Unknown Song')}</span>
-                            <span class="requester">by ${this.escapeHtml(request.requesterName || 'Anonymous')}</span>
-                            <span class="timestamp">${timeString} ${dateString}</span>
-                            <a href="${this.escapeHtml(request.url)}" target="_blank" class="youtube-link" style="margin-left: 10px;">
-                                <i class="fas fa-external-link-alt"></i>
-                            </a>
+                        <div style="width: 30px; text-align: center;">${index + 1}</div>
+                        <div class="song-info-main">
+                            <div class="song-line">
+                                <span class="song-title">${this.escapeHtml(request.title || 'Unknown Song')}</span>
+                                <span class="requester"> - by ${this.escapeHtml(request.requesterName || 'Anonymous')}</span>
+                                <span class="timestamp"> - ${timeString} ${dateString}</span>
+                                <a href="${this.escapeHtml(request.url)}" target="_blank" class="youtube-link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
                         </div>
                         <div class="actions">
                             <button class="btn btn-danger" onclick="adminPanel.deleteRequest('${request.id}')">
