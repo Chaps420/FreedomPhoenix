@@ -1,4 +1,4 @@
-// Stream.js - YouTube 24/7 Stream Management (localStorage version)
+// Stream.js - YouTube 24/7 Stream Management (Firebase version)
 class YouTubeStream {
     constructor() {
         this.player = null;
@@ -6,74 +6,74 @@ class YouTubeStream {
         this.currentVideo = null;
         this.playlist = [];
         this.syncInterval = null;
-        this.streamManager = null;
-        
-        // Initialize localStorage stream manager
-        this.initLocalStorage();
+        this.db = null;
         
         // Bind methods
         this.onPlayerReady = this.onPlayerReady.bind(this);
         this.onPlayerStateChange = this.onPlayerStateChange.bind(this);
         this.onPlayerError = this.onPlayerError.bind(this);
         
-        // Initialize UI
+        // Initialize UI first
         this.initUI();
         
-        // Listen for storage changes (sync across tabs)
-        this.initStorageListener();
+        // Initialize Firebase
+        this.initFirebase();
     }
 
-    initLocalStorage() {
-        // Load the local stream manager
-        if (typeof LocalStreamManager !== 'undefined') {
-            this.streamManager = new LocalStreamManager();
-            console.log('LocalStreamManager initialized successfully');
+    initFirebase() {
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBiwWy-J_C83MWeD88ZODIw2H6r2suUPTY",
+            authDomain: "fpt-radio.firebaseapp.com",
+            databaseURL: "https://fpt-radio-default-rtdb.firebaseio.com",
+            projectId: "fpt-radio",
+            storageBucket: "fpt-radio.firebasestorage.app",
+            messagingSenderId: "121288710296",
+            appId: "1:121288710296:web:041addd1c3a91f2c8f58ed"
+        };
+
+        try {
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+            this.database = firebase.database();
+            console.log('Firebase initialized successfully');
             
-            // Load initial data
-            this.loadStreamData();
-        } else {
-            console.error('LocalStreamManager not found - make sure local-stream.js is loaded');
-            this.showError('Stream manager not available');
+            // Start listening for stream data
+            this.listenForStreamUpdates();
+        } catch (error) {
+            console.error('Firebase initialization failed:', error);
+            this.showError('Failed to connect to stream service');
         }
     }
 
-    initStorageListener() {
-        // Listen for storage events from other tabs or admin panel
-        window.addEventListener('streamUpdate', (event) => {
-            console.log('Stream update received:', event.detail);
-            
-            if (event.detail.type === 'currentVideo') {
-                this.handleStreamUpdate(event.detail.data);
-            } else if (event.detail.type === 'playlist') {
-                this.playlist = event.detail.data;
-                console.log('Playlist updated:', this.playlist.length, 'videos');
-            }
-        });
-
-        // Also listen for localStorage changes from other tabs
-        window.addEventListener('storage', (event) => {
-            if (event.key && event.key.startsWith('phoenixStream_')) {
-                console.log('Storage changed:', event.key);
-                this.loadStreamData();
-            }
-        });
-    }
-
-    loadStreamData() {
-        if (!this.streamManager) return;
-
-        // Load current video
-        const currentVideo = this.streamManager.getCurrentVideo();
-        if (currentVideo) {
-            this.handleStreamUpdate(currentVideo);
-        } else {
-            console.log('No current stream data found');
-            this.showError('No stream currently active');
+    listenForStreamUpdates() {
+        if (!this.database) {
+            console.error('Database not initialized');
+            return;
         }
 
-        // Load playlist
-        this.playlist = this.streamManager.getPlaylist();
-        console.log('Playlist loaded:', this.playlist.length, 'videos');
+        // Listen for current video changes
+        this.database.ref('stream/current').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                this.handleStreamUpdate(data);
+            } else {
+                console.log('No current stream data found');
+                this.handleNoStreamData();
+            }
+        }, (error) => {
+            console.error('Error listening for stream updates:', error);
+            this.showError('Connection to stream lost');
+        });
+
+        // Listen for playlist changes
+        this.database.ref('stream/playlist').on('value', (snapshot) => {
+            const data = snapshot.val();
+            this.playlist = data ? data.videos || [] : [];
+            console.log('Playlist updated:', this.playlist.length, 'videos');
+        }, (error) => {
+            console.error('Error listening for playlist updates:', error);
+        });
     }
 
     initUI() {
@@ -90,13 +90,29 @@ class YouTubeStream {
             errorMessage: document.getElementById('error-message')
         };
 
-        // Event listeners
-        this.elements.muteBtn.addEventListener('click', () => this.toggleMute());
-        this.elements.volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value));
-        this.elements.refreshBtn.addEventListener('click', () => this.refreshStream());
+        // Check if all elements exist
+        const missingElements = [];
+        for (const [key, element] of Object.entries(this.elements)) {
+            if (!element) {
+                missingElements.push(key);
+            }
+        }
 
-        // Set initial volume
-        this.elements.volumeSlider.value = 50;
+        if (missingElements.length > 0) {
+            console.error('Missing UI elements:', missingElements);
+        }
+
+        // Event listeners (only if elements exist)
+        if (this.elements.muteBtn) {
+            this.elements.muteBtn.addEventListener('click', () => this.toggleMute());
+        }
+        if (this.elements.volumeSlider) {
+            this.elements.volumeSlider.addEventListener('input', (e) => this.setVolume(e.target.value));
+            this.elements.volumeSlider.value = 50;
+        }
+        if (this.elements.refreshBtn) {
+            this.elements.refreshBtn.addEventListener('click', () => this.refreshStream());
+        }
         
         // Show loading initially
         this.showLoading();
@@ -120,31 +136,96 @@ class YouTubeStream {
             videoId: streamData.videoId,
             title: streamData.title || 'Unknown Title',
             startTime: startTime,
-            elapsed: elapsed
+            elapsed: elapsed,
+            state: streamData.state || 'playing'
         };
 
-        // Update UI
         this.updateVideoInfo();
         
         // Load/sync video if player is ready
         if (this.isPlayerReady) {
             this.syncVideo();
+            
+            // Handle pause/play state
+            if (streamData.state === 'paused') {
+                setTimeout(() => {
+                    if (this.player) {
+                        this.player.pauseVideo();
+                        if (this.elements.statusText) {
+                            this.elements.statusText.textContent = 'PAUSED';
+                        }
+                    }
+                }, 1000); // Delay to ensure video is loaded first
+            } else {
+                if (this.elements.statusText) {
+                    this.elements.statusText.textContent = 'LIVE';
+                }
+            }
         }
-
-        this.elements.statusText.textContent = 'LIVE';
         this.hideMessages();
+    }
+
+    handleNoStreamData() {
+        // Clear current video info
+        this.currentVideo = null;
+        
+        // Update UI to show offline state
+        if (this.elements.statusText) {
+            this.elements.statusText.textContent = 'OFFLINE';
+        }
+        
+        if (this.elements.videoTitle) {
+            this.elements.videoTitle.textContent = 'No Stream Active';
+        }
+        
+        if (this.elements.videoDescription) {
+            this.elements.videoDescription.textContent = 'Waiting for admin to start a video...';
+        }
+        
+        if (this.elements.videoThumbnail) {
+            this.elements.videoThumbnail.style.display = 'none';
+        }
+        
+        // Pause player if it's playing
+        if (this.player && this.isPlayerReady) {
+            try {
+                this.player.pauseVideo();
+            } catch (error) {
+                console.log('Error pausing player:', error);
+            }
+        }
+        
+        // Show waiting message instead of error
+        this.showWaiting('No stream currently active. Waiting for admin to start broadcasting...');
+    }
+
+    showWaiting(message) {
+        if (this.elements.loadingMessage) {
+            this.elements.loadingMessage.style.display = 'block';
+            this.elements.loadingMessage.textContent = message;
+        }
+        if (this.elements.errorMessage) {
+            this.elements.errorMessage.style.display = 'none';
+        }
     }
 
     updateVideoInfo() {
         if (!this.currentVideo) return;
 
-        this.elements.videoTitle.textContent = this.currentVideo.title;
-        this.elements.videoDescription.textContent = 'Now playing on Freedom Phoenix 24/7 Stream';
+        if (this.elements.videoTitle) {
+            this.elements.videoTitle.textContent = this.currentVideo.title;
+        }
+        
+        if (this.elements.videoDescription) {
+            this.elements.videoDescription.textContent = 'Now playing on Freedom Phoenix 24/7 Stream';
+        }
         
         // Set thumbnail
-        const thumbnailUrl = `https://img.youtube.com/vi/${this.currentVideo.videoId}/mqdefault.jpg`;
-        this.elements.videoThumbnail.src = thumbnailUrl;
-        this.elements.videoThumbnail.style.display = 'block';
+        if (this.elements.videoThumbnail) {
+            const thumbnailUrl = `https://img.youtube.com/vi/${this.currentVideo.videoId}/mqdefault.jpg`;
+            this.elements.videoThumbnail.src = thumbnailUrl;
+            this.elements.videoThumbnail.style.display = 'block';
+        }
     }
 
     syncVideo() {
@@ -249,18 +330,39 @@ class YouTubeStream {
             }
         }
         
+        // If we have a current video but no playlist, repeat the same video
+        if (this.currentVideo) {
+            console.log('No playlist found, repeating current video:', this.currentVideo.title);
+            this.playNextVideo(this.currentVideo);
+            return;
+        }
+        
         // Fallback: wait for admin to update the stream
         this.showError('Stream ended. Waiting for next video from admin...');
-        this.elements.statusText.textContent = 'Waiting for next video...';
+        if (this.elements.statusText) {
+            this.elements.statusText.textContent = 'Waiting for next video...';
+        }
     }
 
     async playNextVideo(video) {
         try {
-            // Update localStorage (this will trigger sync across all viewers)
+            // Save next video to Firebase Realtime Database for real-time sync across all viewers
+            if (this.database) {
+                const streamData = {
+                    videoId: video.videoId,
+                    title: video.title,
+                    thumbnail: video.thumbnail,
+                    startTime: Date.now(),
+                    lastUpdated: Date.now()
+                };
+
+                await this.database.ref('stream/current').set(streamData);
+                console.log('Next video saved to Firebase:', video.title);
+            }
+
+            // Also update localStorage as backup
             if (this.streamManager) {
                 const currentVideo = this.streamManager.setCurrentVideo(video);
-                
-                // Update local state
                 this.currentVideo = currentVideo;
                 this.updateVideoInfo();
             }
@@ -306,20 +408,39 @@ class YouTubeStream {
 
     // Utility Methods
     showLoading() {
-        this.elements.loadingMessage.style.display = 'block';
-        this.elements.errorMessage.style.display = 'none';
+        if (this.elements.loadingMessage) {
+            this.elements.loadingMessage.style.display = 'block';
+        }
+        if (this.elements.errorMessage) {
+            this.elements.errorMessage.style.display = 'none';
+        }
     }
 
     showError(message) {
-        this.elements.errorMessage.style.display = 'block';
-        this.elements.loadingMessage.style.display = 'none';
-        document.getElementById('error-text').textContent = message;
-        this.elements.statusText.textContent = 'Offline';
+        if (this.elements.errorMessage) {
+            this.elements.errorMessage.style.display = 'block';
+        }
+        if (this.elements.loadingMessage) {
+            this.elements.loadingMessage.style.display = 'none';
+        }
+        
+        const errorTextElement = document.getElementById('error-text');
+        if (errorTextElement) {
+            errorTextElement.textContent = message;
+        }
+        
+        if (this.elements.statusText) {
+            this.elements.statusText.textContent = 'Offline';
+        }
     }
 
     hideMessages() {
-        this.elements.loadingMessage.style.display = 'none';
-        this.elements.errorMessage.style.display = 'none';
+        if (this.elements.loadingMessage) {
+            this.elements.loadingMessage.style.display = 'none';
+        }
+        if (this.elements.errorMessage) {
+            this.elements.errorMessage.style.display = 'none';
+        }
     }
 
     // Cleanup
@@ -342,12 +463,12 @@ let player;
 function onYouTubeIframeAPIReady() {
     console.log('YouTube API ready');
     
-    // Create YouTube player
+    // Create YouTube player without a default video
     player = new YT.Player('youtube-player', {
         height: '100%',
         width: '100%',
         playerVars: {
-            'autoplay': 1,
+            'autoplay': 0,
             'controls': 1,
             'disablekb': 1,
             'fs': 1,

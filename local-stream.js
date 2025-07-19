@@ -53,6 +53,15 @@ class LocalStreamManager {
     }
 
     setCurrentVideo(videoData) {
+        if (!videoData) {
+            // Clear current video
+            localStorage.removeItem(this.storageKeys.currentVideo);
+            window.dispatchEvent(new CustomEvent('streamUpdate', { 
+                detail: { type: 'currentVideo', data: null } 
+            }));
+            return null;
+        }
+
         const currentVideo = {
             ...videoData,
             startTime: Date.now()

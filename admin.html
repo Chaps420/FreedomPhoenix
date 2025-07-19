@@ -335,6 +335,40 @@
                     </div>
                 </div>
 
+                <!-- Media Controls -->
+                <div class="queue-table" style="margin-bottom: 20px;">
+                    <div class="table-header">
+                        <div>Stream Controls</div>
+                    </div>
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 15px;">
+                            <button id="previousBtn" class="btn" style="background: #9b59b6; color: white; padding: 12px 20px;">
+                                <i class="fas fa-step-backward"></i> Previous
+                            </button>
+                            <button id="playBtn" class="btn btn-success" style="padding: 12px 20px;">
+                                <i class="fas fa-play"></i> Play
+                            </button>
+                            <button id="pauseBtn" class="btn" style="background: #f39c12; color: white; padding: 12px 20px;">
+                                <i class="fas fa-pause"></i> Pause
+                            </button>
+                            <button id="stopBtn" class="btn btn-danger" style="padding: 12px 20px;">
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                            <button id="nextBtn" class="btn" style="background: #9b59b6; color: white; padding: 12px 20px;">
+                                <i class="fas fa-step-forward"></i> Next
+                            </button>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="restartBtn" class="btn" style="background: #3498db; color: white;">
+                                <i class="fas fa-redo"></i> Restart Current
+                            </button>
+                            <button id="shuffleCurrentBtn" class="btn" style="background: #e67e22; color: white;">
+                                <i class="fas fa-random"></i> Play Random
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Add Video Form -->
                 <div class="queue-table" style="margin-bottom: 20px;">
                     <div class="table-header">
@@ -354,6 +388,9 @@
                             </button>
                             <button id="addPlaylistBtn" class="btn" style="background: #8e44ad; color: white;">
                                 <i class="fas fa-list"></i> Add Playlist
+                            </button>
+                            <button id="quickStartBtn" class="btn" style="background: #f39c12; color: white;">
+                                <i class="fas fa-rocket"></i> Quick Start Demo
                             </button>
                         </div>
                     </div>
@@ -379,6 +416,9 @@
                     </button>
                     <button id="testStreamBtn" class="btn" style="background: #3498db; color: white;">
                         <i class="fas fa-vial"></i> Test Stream
+                    </button>
+                    <button id="clearAllBtn" class="btn" style="background: #e74c3c; color: white;">
+                        <i class="fas fa-broom"></i> Clear All
                     </button>
                     <a href="stream.html" target="_blank" class="btn btn-success">
                         <i class="fas fa-external-link-alt"></i> View Stream
@@ -445,7 +485,7 @@
 
                     // Import Firebase modules
                     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
-                    const { getDatabase, ref, onValue, remove } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js");
+                    const { getDatabase, ref, onValue, remove, set, get } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js");
                     
                     // Initialize Firebase
                     this.app = initializeApp(firebaseConfig);
@@ -453,6 +493,8 @@
                     this.ref = ref;
                     this.onValue = onValue;
                     this.remove = remove;
+                    this.set = set;
+                    this.get = get;
                     
                     console.log('Firebase initialized successfully');
                 } catch (error) {
@@ -507,6 +549,43 @@
 
                 document.getElementById('testStreamBtn').addEventListener('click', () => {
                     this.testStream();
+                });
+
+                document.getElementById('quickStartBtn').addEventListener('click', () => {
+                    this.quickStartDemo();
+                });
+
+                document.getElementById('clearAllBtn').addEventListener('click', () => {
+                    this.clearAllData();
+                });
+
+                // Media control events
+                document.getElementById('previousBtn').addEventListener('click', () => {
+                    this.playPreviousVideo();
+                });
+
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.resumeStream();
+                });
+
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.pauseStream();
+                });
+
+                document.getElementById('stopBtn').addEventListener('click', () => {
+                    this.stopStream();
+                });
+
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    this.playNextVideoFromAdmin();
+                });
+
+                document.getElementById('restartBtn').addEventListener('click', () => {
+                    this.restartCurrentVideo();
+                });
+
+                document.getElementById('shuffleCurrentBtn').addEventListener('click', () => {
+                    this.playRandomVideo();
                 });
             }
 
@@ -697,14 +776,55 @@
                         document.getElementById('streamStatus').style.color = '#e74c3c';
                     }
 
-                    // Load playlist from localStorage
-                    this.playlist = this.streamManager.getPlaylist();
-                    this.updatePlaylistDisplay();
-                    document.getElementById('playlistCount').textContent = this.playlist.length;
+                    // Load playlist from Firebase first, then fallback to localStorage
+                    await this.loadPlaylistFromFirebase();
 
                 } catch (error) {
                     console.error('Error loading stream data:', error);
                     this.showMessage('Error loading stream data: ' + error.message, 'error');
+                }
+            }
+
+            async loadPlaylistFromFirebase() {
+                if (!this.database) {
+                    // Fallback to localStorage if Firebase not available
+                    this.playlist = this.streamManager.getPlaylist();
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = this.playlist.length;
+                    return;
+                }
+
+                try {
+                    // Get playlist from Firebase Realtime Database using modular SDK
+                    const snapshot = await this.get(this.ref(this.database, 'stream/playlist'));
+                    const data = snapshot.val();
+
+                    if (data && data.videos) {
+                        this.playlist = data.videos;
+                        console.log('Playlist loaded from Firebase:', this.playlist.length, 'videos');
+                        
+                        // Also update localStorage to sync
+                        if (this.streamManager && this.playlist.length > 0) {
+                            this.streamManager.savePlaylist(this.playlist);
+                        }
+                    } else {
+                        // No Firebase playlist, load from localStorage
+                        this.playlist = this.streamManager.getPlaylist();
+                        // If localStorage has playlist, save to Firebase
+                        if (this.playlist.length > 0) {
+                            await this.savePlaylistToFirebase();
+                        }
+                    }
+
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = this.playlist.length;
+
+                } catch (error) {
+                    console.error('Error loading playlist from Firebase:', error);
+                    // Fallback to localStorage
+                    this.playlist = this.streamManager.getPlaylist();
+                    this.updatePlaylistDisplay();
+                    document.getElementById('playlistCount').textContent = this.playlist.length;
                 }
             }
 
@@ -784,7 +904,8 @@
                 return {
                     videoId: videoId,
                     title: `Video ${videoId}`, // Placeholder - would get from YouTube API
-                    duration: 'Unknown' // Placeholder - would get from YouTube API
+                    duration: 'Unknown', // Placeholder - would get from YouTube API
+                    thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
                 };
             }
 
@@ -806,6 +927,9 @@
                         this.updatePlaylistDisplay();
                         document.getElementById('playlistCount').textContent = this.playlist.length;
                     }
+
+                    // Save updated playlist to Firebase for auto-play functionality
+                    await this.savePlaylistToFirebase();
                     
                     document.getElementById('videoUrl').value = '';
                     this.showMessage('Video added to playlist!', 'success');
@@ -834,6 +958,9 @@
                         document.getElementById('streamStatus').textContent = 'Live';
                         document.getElementById('streamStatus').style.color = '#2ecc71';
                     }
+
+                    // Also save to Firebase for real-time sync with stream viewers
+                    await this.saveCurrentVideoToFirebase(videoInfo);
                     
                     document.getElementById('videoUrl').value = '';
                     this.showMessage('Video started playing!', 'success');
@@ -860,6 +987,9 @@
                         document.getElementById('streamStatus').textContent = 'Live';
                         document.getElementById('streamStatus').style.color = '#2ecc71';
                     }
+
+                    // Also save to Firebase for real-time sync with stream viewers
+                    await this.saveCurrentVideoToFirebase(video);
                     
                     this.showMessage('Video started playing!', 'success');
                 } catch (error) {
@@ -879,6 +1009,9 @@
                     this.updatePlaylistDisplay();
                     document.getElementById('playlistCount').textContent = this.playlist.length;
                 }
+
+                // Save updated playlist to Firebase
+                await this.savePlaylistToFirebase();
                 
                 this.showMessage('Video removed from playlist', 'success');
             }
@@ -893,6 +1026,9 @@
                     this.playlist = this.streamManager.shufflePlaylist();
                     this.updatePlaylistDisplay();
                 }
+
+                // Save updated playlist to Firebase
+                await this.savePlaylistToFirebase();
 
                 this.showMessage('Playlist shuffled!', 'success');
             }
@@ -909,7 +1045,45 @@
                     document.getElementById('playlistCount').textContent = 0;
                 }
 
+                // Save empty playlist to Firebase
+                await this.savePlaylistToFirebase();
+
                 this.showMessage('Playlist cleared!', 'success');
+            }
+
+            async saveCurrentVideoToFirebase(video) {
+                if (!this.database) return;
+
+                try {
+                    const streamData = {
+                        videoId: video.videoId,
+                        title: video.title || 'Unknown Title',
+                        thumbnail: video.thumbnail || `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`,
+                        startTime: Date.now(),
+                        lastUpdated: Date.now()
+                    };
+
+                    await this.set(this.ref(this.database, 'stream/current'), streamData);
+                    console.log('Current video saved to Firebase:', video.title);
+                } catch (error) {
+                    console.error('Error saving to Firebase:', error);
+                }
+            }
+
+            async savePlaylistToFirebase() {
+                if (!this.database) return;
+
+                try {
+                    const playlistData = {
+                        videos: this.playlist,
+                        lastUpdated: Date.now()
+                    };
+
+                    await this.set(this.ref(this.database, 'stream/playlist'), playlistData);
+                    console.log('Playlist saved to Firebase:', this.playlist.length, 'videos');
+                } catch (error) {
+                    console.error('Error saving playlist to Firebase:', error);
+                }
             }
 
             async addPlaylistFromUrl() {
@@ -961,10 +1135,281 @@
                     this.showMessage('Error starting test stream: ' + error.message, 'error');
                 }
             }
+
+            async quickStartDemo() {
+                try {
+                    const demoVideos = [
+                        { 
+                            videoId: 'jNQXAC9IVRw', 
+                            title: 'Epic Music - Phoenix Rising', 
+                            duration: '3:45',
+                            thumbnail: 'https://img.youtube.com/vi/jNQXAC9IVRw/mqdefault.jpg'
+                        },
+                        { 
+                            videoId: 'dQw4w9WgXcQ', 
+                            title: 'Never Gonna Give You Up', 
+                            duration: '3:33',
+                            thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg'
+                        },
+                        { 
+                            videoId: 'fJ9rUzIMcZQ', 
+                            title: 'Queen - Bohemian Rhapsody', 
+                            duration: '5:55',
+                            thumbnail: 'https://img.youtube.com/vi/fJ9rUzIMcZQ/mqdefault.jpg'
+                        }
+                    ];
+
+                    // Clear existing playlist and add demo videos
+                    if (this.streamManager) {
+                        this.streamManager.savePlaylist(demoVideos);
+                        this.playlist = demoVideos;
+                        this.updatePlaylistDisplay();
+                        document.getElementById('playlistCount').textContent = this.playlist.length;
+                    }
+
+                    // Save playlist to Firebase for real-time sync
+                    await this.savePlaylistToFirebase();
+
+                    // Start playing the first video
+                    const firstVideo = demoVideos[0];
+                    if (this.streamManager) {
+                        this.currentVideo = this.streamManager.setCurrentVideo(firstVideo);
+                        this.updateCurrentVideoDisplay();
+                    }
+
+                    // Save current video to Firebase
+                    await this.saveCurrentVideoToFirebase(firstVideo);
+                    
+                    document.getElementById('streamStatus').textContent = 'Live';
+                    document.getElementById('streamStatus').style.color = '#2ecc71';
+
+                    this.showMessage('Demo stream started with 3 videos! They will auto-loop. Check the stream page.', 'success');
+                } catch (error) {
+                    console.error('Error starting demo stream:', error);
+                    this.showMessage('Error starting demo stream: ' + error.message, 'error');
+                }
+            }
+
+            async clearAllData() {
+                if (!confirm('This will clear all stream data (current video, playlist) from both localStorage and Firebase. Are you sure?')) {
+                    return;
+                }
+
+                try {
+                    // Clear localStorage
+                    if (this.streamManager) {
+                        this.streamManager.savePlaylist([]);
+                        this.streamManager.setCurrentVideo(null);
+                    }
+
+                    // Clear local state
+                    this.playlist = [];
+                    this.currentVideo = null;
+
+                    // Clear Firebase data
+                    if (this.database) {
+                        // Remove current video
+                        await this.set(this.ref(this.database, 'stream/current'), null);
+                        // Remove playlist
+                        await this.set(this.ref(this.database, 'stream/playlist'), null);
+                        console.log('Firebase data cleared');
+                    }
+
+                    // Update UI
+                    this.updatePlaylistDisplay();
+                    this.updateCurrentVideoDisplay();
+                    document.getElementById('playlistCount').textContent = 0;
+                    document.getElementById('streamStatus').textContent = 'Offline';
+                    document.getElementById('streamStatus').style.color = '#e74c3c';
+
+                    this.showMessage('All stream data cleared successfully!', 'success');
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    this.showMessage('Error clearing data: ' + error.message, 'error');
+                }
+            }
+
+            // Media Control Methods
+            async playPreviousVideo() {
+                if (!this.playlist.length) {
+                    this.showMessage('No videos in playlist', 'error');
+                    return;
+                }
+
+                try {
+                    // Find current video index
+                    let currentIndex = -1;
+                    if (this.currentVideo) {
+                        currentIndex = this.playlist.findIndex(video => video.videoId === this.currentVideo.videoId);
+                    }
+
+                    // Get previous video index (with wraparound)
+                    const previousIndex = currentIndex <= 0 ? this.playlist.length - 1 : currentIndex - 1;
+                    const previousVideo = this.playlist[previousIndex];
+
+                    if (previousVideo) {
+                        await this.playVideoAtIndex(previousIndex);
+                        this.showMessage(`Playing previous video: ${previousVideo.title}`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Error playing previous video:', error);
+                    this.showMessage('Error playing previous video: ' + error.message, 'error');
+                }
+            }
+
+            async resumeStream() {
+                try {
+                    if (!this.currentVideo && this.playlist.length > 0) {
+                        // No current video, start with first in playlist
+                        await this.playVideoAtIndex(0);
+                        this.showMessage('Stream resumed with first video', 'success');
+                    } else if (this.currentVideo) {
+                        // Resume current video by updating state to playing
+                        const resumeData = {
+                            ...this.currentVideo,
+                            state: 'playing',
+                            startTime: Date.now(), // Reset start time for proper sync
+                            lastUpdated: Date.now()
+                        };
+                        
+                        if (this.database) {
+                            await this.set(this.ref(this.database, 'stream/current'), resumeData);
+                        }
+                        
+                        this.showMessage('Stream resumed', 'success');
+                    } else {
+                        this.showMessage('No videos available to play', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error resuming stream:', error);
+                    this.showMessage('Error resuming stream: ' + error.message, 'error');
+                }
+            }
+
+            async pauseStream() {
+                try {
+                    if (!this.currentVideo) {
+                        this.showMessage('No video currently playing to pause', 'error');
+                        return;
+                    }
+
+                    // Set pause state in Firebase
+                    if (this.database) {
+                        const pauseData = {
+                            ...this.currentVideo,
+                            state: 'paused',
+                            pausedAt: Date.now(),
+                            lastUpdated: Date.now()
+                        };
+                        await this.set(this.ref(this.database, 'stream/current'), pauseData);
+                    }
+
+                    this.showMessage('Stream paused', 'success');
+                } catch (error) {
+                    console.error('Error pausing stream:', error);
+                    this.showMessage('Error pausing stream: ' + error.message, 'error');
+                }
+            }
+
+            async stopStream() {
+                try {
+                    // Clear current video to stop the stream
+                    if (this.streamManager) {
+                        this.streamManager.setCurrentVideo(null);
+                        this.currentVideo = null;
+                        this.updateCurrentVideoDisplay();
+                    }
+
+                    // Clear Firebase current video
+                    if (this.database) {
+                        await this.set(this.ref(this.database, 'stream/current'), null);
+                    }
+
+                    document.getElementById('streamStatus').textContent = 'Offline';
+                    document.getElementById('streamStatus').style.color = '#e74c3c';
+
+                    this.showMessage('Stream stopped', 'success');
+                } catch (error) {
+                    console.error('Error stopping stream:', error);
+                    this.showMessage('Error stopping stream: ' + error.message, 'error');
+                }
+            }
+
+            async playNextVideoFromAdmin() {
+                if (!this.playlist.length) {
+                    this.showMessage('No videos in playlist', 'error');
+                    return;
+                }
+
+                try {
+                    // Find current video index
+                    let currentIndex = -1;
+                    if (this.currentVideo) {
+                        currentIndex = this.playlist.findIndex(video => video.videoId === this.currentVideo.videoId);
+                    }
+
+                    // Get next video index (with wraparound)
+                    const nextIndex = (currentIndex + 1) % this.playlist.length;
+                    const nextVideo = this.playlist[nextIndex];
+
+                    if (nextVideo) {
+                        await this.playVideoAtIndex(nextIndex);
+                        this.showMessage(`Playing next video: ${nextVideo.title}`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Error playing next video:', error);
+                    this.showMessage('Error playing next video: ' + error.message, 'error');
+                }
+            }
+
+            async restartCurrentVideo() {
+                if (!this.currentVideo) {
+                    this.showMessage('No video currently playing', 'error');
+                    return;
+                }
+
+                try {
+                    // Restart current video by setting it again with new timestamp
+                    const videoToRestart = { ...this.currentVideo };
+                    delete videoToRestart.startTime; // Remove old start time
+
+                    if (this.streamManager) {
+                        this.currentVideo = this.streamManager.setCurrentVideo(videoToRestart);
+                        this.updateCurrentVideoDisplay();
+                    }
+
+                    // Save restarted video to Firebase
+                    await this.saveCurrentVideoToFirebase(videoToRestart);
+
+                    this.showMessage(`Restarted video: ${videoToRestart.title}`, 'success');
+                } catch (error) {
+                    console.error('Error restarting video:', error);
+                    this.showMessage('Error restarting video: ' + error.message, 'error');
+                }
+            }
+
+            async playRandomVideo() {
+                if (!this.playlist.length) {
+                    this.showMessage('No videos in playlist', 'error');
+                    return;
+                }
+
+                try {
+                    // Pick a random video from the playlist
+                    const randomIndex = Math.floor(Math.random() * this.playlist.length);
+                    const randomVideo = this.playlist[randomIndex];
+
+                    await this.playVideoAtIndex(randomIndex);
+                    this.showMessage(`Playing random video: ${randomVideo.title}`, 'success');
+                } catch (error) {
+                    console.error('Error playing random video:', error);
+                    this.showMessage('Error playing random video: ' + error.message, 'error');
+                }
+            }
         }
 
         // Initialize admin panel
-        const adminPanel = new AdminPanel();
+        window.adminPanel = new AdminPanel();
     </script>
 </body>
 </html>
