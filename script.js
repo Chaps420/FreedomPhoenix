@@ -509,43 +509,56 @@ document.addEventListener('DOMContentLoaded', function() {
     // Token Data Update System
     class TokenDataUpdater {
         constructor() {
-            this.tokenAddress = 'rBXRBN9gSFE4qL6DGWYHgKCLtoMzUVL5cF';
-            this.tokenSymbol = 'FPT';
+            this.tokens = {
+                FPT: {
+                    address: 'rBXRBN9gSFE4qL6DGWYHgKCLtoMzUVL5cF',
+                    symbol: 'FPT'
+                },
+                ODC: {
+                    address: 'rh8EXR5mUz9CJNiHeVQVx4LpChFJ86w5nx',
+                    symbol: 'ODC'
+                }
+            };
             this.updateInterval = 300000; // Update every 5 minutes
             
             this.init();
         }
         
         async init() {
-            await this.updateTokenData();
+            await this.updateAllTokenData();
             // Set up periodic updates
-            setInterval(() => this.updateTokenData(), this.updateInterval);
+            setInterval(() => this.updateAllTokenData(), this.updateInterval);
         }
         
-        async fetchTokenData() {
+        async updateAllTokenData() {
+            await this.updateTokenData('FPT');
+            await this.updateTokenData('ODC');
+        }
+        
+        async fetchTokenData(tokenType) {
             try {
-                // Try multiple methods to get the data
+                const token = this.tokens[tokenType];
                 
-                // Method 1: Try JSONP-style approach
+                // Try multiple methods to get the data
                 const proxyUrl = 'https://api.allorigins.win/get?url=';
-                const targetUrl = encodeURIComponent(`https://firstledger.net/token/${this.tokenAddress}/${this.tokenSymbol}`);
+                const targetUrl = encodeURIComponent(`https://firstledger.net/token/${token.address}/${token.symbol}`);
                 
                 const response = await fetch(proxyUrl + targetUrl);
                 const data = await response.json();
                 
                 if (data.contents) {
-                    return this.parseTokenDataFromHTML(data.contents);
+                    return this.parseTokenDataFromHTML(data.contents, tokenType);
                 }
                 
                 throw new Error('No data received from proxy');
                 
             } catch (error) {
-                console.warn('Failed to fetch live token data, using simulated data:', error);
-                return this.getSimulatedData();
+                console.warn(`Failed to fetch live ${tokenType} token data, using simulated data:`, error);
+                return this.getSimulatedData(tokenType);
             }
         }
         
-        parseTokenDataFromHTML(html) {
+        parseTokenDataFromHTML(html, tokenType) {
             try {
                 // Extract data using regex patterns
                 const marketCapMatch = html.match(/MKT CAP[^$]*\$([0-9,]+\.?[0-9]*k?)/i);
@@ -556,75 +569,101 @@ document.addEventListener('DOMContentLoaded', function() {
                 const liquidityMatch = html.match(/LIQUIDITY[^$]*\$([0-9,]+\.?[0-9]*k?)/i);
                 
                 return {
-                    marketCap: marketCapMatch ? `$${marketCapMatch[1]}` : this.getSimulatedData().marketCap,
-                    holders: holdersMatch ? holdersMatch[1] : this.getSimulatedData().holders,
-                    price: priceMatch ? `$0.${priceMatch[1]}` : this.getSimulatedData().price,
-                    volume: volumeMatch ? `${volumeMatch[1]} XRP` : this.getSimulatedData().volume,
-                    supply: supplyMatch ? supplyMatch[1] : this.getSimulatedData().supply,
-                    liquidity: liquidityMatch ? `$${liquidityMatch[1]}` : this.getSimulatedData().liquidity
+                    marketCap: marketCapMatch ? `$${marketCapMatch[1]}` : this.getSimulatedData(tokenType).marketCap,
+                    holders: holdersMatch ? holdersMatch[1] : this.getSimulatedData(tokenType).holders,
+                    price: priceMatch ? `$0.${priceMatch[1]}` : this.getSimulatedData(tokenType).price,
+                    volume: volumeMatch ? `${volumeMatch[1]} XRP` : this.getSimulatedData(tokenType).volume,
+                    supply: supplyMatch ? supplyMatch[1] : this.getSimulatedData(tokenType).supply,
+                    liquidity: liquidityMatch ? `$${liquidityMatch[1]}` : this.getSimulatedData(tokenType).liquidity
                 };
             } catch (error) {
-                console.warn('Error parsing token data:', error);
-                return this.getSimulatedData();
+                console.warn(`Error parsing ${tokenType} token data:`, error);
+                return this.getSimulatedData(tokenType);
             }
         }
         
-        getSimulatedData() {
-            // Simulate slight variations in data to show it's updating
-            const baseMarketCap = 37150; // $37.15k in dollars
-            const baseHolders = 254;
-            const basePrice = 0.0000391;
-            const baseLiquidity = 12940; // $12.94k in dollars
+        getSimulatedData(tokenType) {
+            let baseData;
+            
+            if (tokenType === 'FPT') {
+                baseData = {
+                    marketCap: 37150, // $37.15k
+                    holders: 254,
+                    price: 0.0000391,
+                    liquidity: 12940, // $12.94k
+                    volume: 2.44,
+                    supply: '949M'
+                };
+            } else { // ODC
+                baseData = {
+                    marketCap: 28500, // $28.5k
+                    holders: 187,
+                    price: 0.0000287,
+                    liquidity: 8750, // $8.75k
+                    volume: 1.87,
+                    supply: '742M'
+                };
+            }
             
             // Add small random variations (±5%)
             const variation = () => 0.95 + (Math.random() * 0.1); // 0.95 to 1.05
             
-            const marketCap = Math.round(baseMarketCap * variation());
-            const holders = Math.round(baseHolders * (0.98 + Math.random() * 0.04)); // Holders can only grow slowly
-            const price = (basePrice * variation()).toFixed(7);
-            const liquidity = Math.round(baseLiquidity * variation());
-            const volume = (2.44 * variation()).toFixed(2);
+            const marketCap = Math.round(baseData.marketCap * variation());
+            const holders = Math.round(baseData.holders * (0.98 + Math.random() * 0.04)); // Holders can only grow slowly
+            const price = (baseData.price * variation()).toFixed(7);
+            const liquidity = Math.round(baseData.liquidity * variation());
+            const volume = (baseData.volume * variation()).toFixed(2);
             
             return {
                 marketCap: `$${(marketCap / 1000).toFixed(2)}k`,
                 holders: holders.toString(),
                 price: `$${price}`,
                 volume: `${volume}k XRP`,
-                supply: '949M',
+                supply: baseData.supply,
                 liquidity: `$${(liquidity / 1000).toFixed(2)}k`
             };
         }
         
-        async updateTokenData() {
+        async updateTokenData(tokenType) {
             try {
-                console.log('🔄 Updating token data...');
-                const data = await this.fetchTokenData();
+                console.log(`🔄 Updating ${tokenType} token data...`);
+                const data = await this.fetchTokenData(tokenType);
                 
                 // Update DOM elements with animation
-                this.updateStatElement('Market Cap', data.marketCap);
-                this.updateStatElement('Holders', data.holders);
-                this.updateStatElement('Price', data.price);
-                this.updateStatElement('Supply', data.supply);
-                this.updateStatElement('24h Volume', data.volume);
-                this.updateStatElement('Liquidity', data.liquidity);
+                this.updateStatElement('Market Cap', data.marketCap, tokenType);
+                this.updateStatElement('Holders', data.holders, tokenType);
+                this.updateStatElement('Price', data.price, tokenType);
+                this.updateStatElement('Supply', data.supply, tokenType);
+                this.updateStatElement('24h Volume', data.volume, tokenType);
+                this.updateStatElement('Liquidity', data.liquidity, tokenType);
                 
-                console.log('✅ Token data updated:', data);
+                console.log(`✅ ${tokenType} token data updated:`, data);
                 
                 // Add visual feedback for update
                 this.showUpdateIndicator();
                 
             } catch (error) {
-                console.error('❌ Failed to update token data:', error);
+                console.error(`❌ Failed to update ${tokenType} token data:`, error);
             }
         }
         
-        updateStatElement(label, value) {
-            // Find the stat card with the matching label
-            const statCards = document.querySelectorAll('.stat-card');
+        updateStatElement(label, value, tokenType) {
+            // Find the stat card with the matching label in the correct token section
+            const tokenStatsSelector = tokenType === 'ODC' ? '.token-stats .odc-stat' : '.token-stats .stat-value:not(.odc-stat)';
+            const tokenSection = tokenType === 'ODC' ? 
+                document.querySelectorAll('.token-stats')[1] : // ODC is the second token-stats section
+                document.querySelectorAll('.token-stats')[0];   // FPT is the first token-stats section
+            
+            if (!tokenSection) return;
+            
+            const statCards = tokenSection.querySelectorAll('.stat-card');
             statCards.forEach(card => {
                 const labelElement = card.querySelector('h4');
                 if (labelElement && labelElement.textContent.trim() === label) {
-                    const valueElement = card.querySelector('.stat-value');
+                    const valueElement = tokenType === 'ODC' ? 
+                        card.querySelector('.odc-stat') : 
+                        card.querySelector('.stat-value');
+                    
                     if (valueElement && valueElement.textContent !== value) {
                         // Add animation class
                         valueElement.classList.add('updating');
