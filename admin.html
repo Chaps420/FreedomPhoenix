@@ -141,10 +141,9 @@
         .queue-item {
             padding: 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: grid;
-            grid-template-columns: 50px 1fr 200px 150px;
-            gap: 15px;
+            display: flex;
             align-items: center;
+            gap: 15px;
             transition: background 0.3s ease;
         }
 
@@ -210,10 +209,15 @@
         }
 
         .youtube-link {
-            color: #ff6b35;
+            color: #ff6b35 !important;
             text-decoration: none;
+            font-size: 12px;
             margin-left: 10px;
             flex-shrink: 0;
+        }
+        
+        .youtube-link:hover {
+            color: #ff8c42 !important;
         }
 
         .requester-name {
@@ -796,7 +800,7 @@
                     recentContainer.appendChild(item);
                 });
 
-                // Render full queue with checkboxes
+                // Render full queue with checkboxes - BACK TO SIMPLE ONE-LINE
                 sortedRequests.forEach((request, index) => {
                     const item = document.createElement('div');
                     item.className = 'queue-item';
