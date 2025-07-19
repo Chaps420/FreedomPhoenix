@@ -96,7 +96,11 @@ class YouTubeStream {
                 const data = doc.data();
                 this.playlist = data.videos || [];
                 console.log('Playlist updated:', this.playlist.length, 'videos');
+            } else {
+                this.playlist = [];
             }
+        }, (error) => {
+            console.error('Error listening for playlist updates:', error);
         });
     }
 
@@ -201,11 +205,20 @@ class YouTubeStream {
         
         if (state === YT.PlayerState.ENDED) {
             // Video ended, should automatically move to next
+            console.log('Video ended, requesting next video...');
             this.requestNextVideo();
         } else if (state === YT.PlayerState.PLAYING) {
             this.elements.statusText.textContent = 'LIVE';
+            this.hideMessages();
         } else if (state === YT.PlayerState.BUFFERING) {
             this.elements.statusText.textContent = 'Buffering...';
+        } else if (state === YT.PlayerState.PAUSED) {
+            // Auto-resume if paused (for continuous stream)
+            setTimeout(() => {
+                if (this.player && this.player.getPlayerState() === YT.PlayerState.PAUSED) {
+                    this.player.playVideo();
+                }
+            }, 2000);
         }
     }
 
@@ -218,11 +231,52 @@ class YouTubeStream {
     }
 
     requestNextVideo() {
-        // This would typically be handled by admin, but we can request it
         console.log('Requesting next video...');
         
-        // In a real implementation, you might notify the admin or auto-advance
-        // For now, we'll wait for admin to update the stream
+        // Try to auto-advance if we have access to the playlist
+        if (this.playlist && this.playlist.length > 0) {
+            // Find current video index
+            const currentIndex = this.playlist.findIndex(video => 
+                video.videoId === this.currentVideo?.videoId
+            );
+            
+            // Get next video (or loop back to start)
+            const nextIndex = (currentIndex + 1) % this.playlist.length;
+            const nextVideo = this.playlist[nextIndex];
+            
+            if (nextVideo) {
+                console.log('Auto-advancing to next video:', nextVideo.title);
+                this.playNextVideo(nextVideo);
+                return;
+            }
+        }
+        
+        // Fallback: wait for admin to update the stream
+        this.showError('Stream ended. Waiting for next video from admin...');
+        this.elements.statusText.textContent = 'Waiting for next video...';
+    }
+
+    async playNextVideo(video) {
+        try {
+            const currentVideo = {
+                videoId: video.videoId,
+                title: video.title,
+                startTime: Date.now()
+            };
+
+            // Update Firebase (this will trigger sync across all viewers)
+            if (this.db) {
+                await this.db.collection('stream').doc('current').set(currentVideo);
+            }
+            
+            // Update local state
+            this.currentVideo = currentVideo;
+            this.updateVideoInfo();
+            
+        } catch (error) {
+            console.error('Error playing next video:', error);
+            this.showError('Error loading next video: ' + error.message);
+        }
     }
 
     // Control Methods

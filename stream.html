@@ -10,6 +10,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* CSS Variables for consistency */
+        :root {
+            --phoenix-red: #FF4500;
+            --phoenix-orange: #FF6B35;
+            --phoenix-yellow: #FFD700;
+            --flame-red: #DC143C;
+            --flame-orange: #FF7F00;
+            --deep-red: #8B0000;
+            --ash-gray: #2C2C2C;
+            --charcoal: #1A1A1A;
+            --ember-glow: #FF4500;
+            --golden-flame: #FFA500;
+            
+            --flame-gradient: linear-gradient(45deg, var(--flame-red), var(--phoenix-orange), var(--phoenix-yellow));
+            --phoenix-gradient: linear-gradient(135deg, var(--deep-red), var(--phoenix-red), var(--phoenix-orange));
+            --ember-gradient: radial-gradient(circle, var(--ember-glow), var(--flame-red));
+            
+            --font-primary: 'Cinzel', serif;
+            --font-secondary: 'Orbitron', monospace;
+        }
+
         /* Stream-specific styles */
         .stream-container {
             max-width: 1200px;

@@ -208,6 +208,12 @@
             border: 1px solid #e74c3c;
         }
 
+        .message.info {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid #3498db;
+        }
+
         @media (max-width: 768px) {
             .table-header, .queue-item {
                 grid-template-columns: 1fr;
@@ -371,6 +377,9 @@
                     <button id="clearPlaylistBtn" class="btn btn-danger">
                         <i class="fas fa-trash"></i> Clear Playlist
                     </button>
+                    <button id="testStreamBtn" class="btn" style="background: #3498db; color: white;">
+                        <i class="fas fa-vial"></i> Test Stream
+                    </button>
                     <a href="stream.html" target="_blank" class="btn btn-success">
                         <i class="fas fa-external-link-alt"></i> View Stream
                     </a>
@@ -470,6 +479,10 @@
 
                 document.getElementById('clearPlaylistBtn').addEventListener('click', () => {
                     this.clearPlaylist();
+                });
+
+                document.getElementById('testStreamBtn').addEventListener('click', () => {
+                    this.testStream();
                 });
             }
 
@@ -894,6 +907,36 @@
 
                 this.showMessage('Playlist import feature coming soon!', 'info');
                 // TODO: Implement playlist import using YouTube API
+            }
+
+            async testStream() {
+                try {
+                    // Add some test videos to the playlist
+                    const testVideos = [
+                        { videoId: 'dQw4w9WgXcQ', title: 'Rick Astley - Never Gonna Give You Up', duration: '3:33' },
+                        { videoId: 'fJ9rUzIMcZQ', title: 'Queen - Bohemian Rhapsody', duration: '5:55' },
+                        { videoId: 'L_jWHffIx5E', title: 'Smash Mouth - All Star', duration: '3:21' }
+                    ];
+
+                    // Clear existing playlist and add test videos
+                    this.playlist = [...testVideos];
+                    await this.savePlaylist();
+
+                    // Start playing the first video
+                    const firstVideo = {
+                        videoId: testVideos[0].videoId,
+                        title: testVideos[0].title,
+                        startTime: Date.now()
+                    };
+
+                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+                    await setDoc(this.doc(this.firestore, 'stream', 'current'), firstVideo);
+
+                    this.showMessage('Test stream started! Check the stream page.', 'success');
+                } catch (error) {
+                    console.error('Error starting test stream:', error);
+                    this.showMessage('Error starting test stream: ' + error.message, 'error');
+                }
             }
         }
 

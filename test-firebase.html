@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Connection Test</h1>
+    <button id="testBtn">Test Firebase Connection</button>
+    <div id="result"></div>
+
+    <script type="module">
+        async function testFirebase() {
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyBiwWy-J_C83MWeD88ZODIw2H6r2suUPTY",
+                    authDomain: "fpt-radio.firebaseapp.com",
+                    databaseURL: "https://fpt-radio-default-rtdb.firebaseio.com",
+                    projectId: "fpt-radio",
+                    storageBucket: "fpt-radio.firebasestorage.app",
+                    messagingSenderId: "121288710296",
+                    appId: "1:121288710296:web:041addd1c3a91f2c8f58ed"
+                };
+
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
+                const { getFirestore, doc, setDoc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+                
+                const app = initializeApp(firebaseConfig);
+                const db = getFirestore(app);
+                
+                // Test writing data
+                await setDoc(doc(db, 'test', 'connection'), {
+                    timestamp: Date.now(),
+                    message: 'Firebase connection successful'
+                });
+                
+                // Test reading data
+                const docSnap = await getDoc(doc(db, 'test', 'connection'));
+                
+                if (docSnap.exists()) {
+                    document.getElementById('result').innerHTML = `
+                        <p style="color: green;">✅ Firebase connection successful!</p>
+                        <p>Data: ${JSON.stringify(docSnap.data(), null, 2)}</p>
+                    `;
+                } else {
+                    document.getElementById('result').innerHTML = '<p style="color: red;">❌ No document found</p>';
+                }
+                
+            } catch (error) {
+                console.error('Firebase error:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+
+        document.getElementById('testBtn').addEventListener('click', testFirebase);
+    </script>
+</body>
+</html>
