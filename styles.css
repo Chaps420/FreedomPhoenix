@@ -943,15 +943,15 @@ section {
 
 .token-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, minmax(250px, 1fr));
+    gap: 1rem;
     align-items: stretch;
     width: 100%;
 }
 
 .token-card {
     background: rgba(44, 44, 44, 0.8);
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 15px;
     border: 2px solid rgba(255, 69, 0, 0.3);
     min-height: 100%;
@@ -959,10 +959,7 @@ section {
     flex-direction: column;
     justify-content: space-between;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 100%;
+}
 }
 
 .token-card h3 {
@@ -981,8 +978,8 @@ section {
 .token-links {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    margin-top: 1rem;
+    gap: 0.3rem;
+    margin-top: 0.8rem;
     flex-grow: 1;
     justify-content: flex-start;
 }
@@ -990,15 +987,15 @@ section {
 .token-link {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 8px 16px;
+    gap: 0.4rem;
+    padding: 6px 12px;
     background: rgba(255, 69, 0, 0.1);
     border: 1px solid var(--phoenix-orange);
-    border-radius: 8px;
+    border-radius: 6px;
     color: var(--phoenix-orange);
     text-decoration: none;
     transition: all 0.3s ease;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
 }
 
@@ -1057,9 +1054,9 @@ section {
 .token-stats {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
     background: rgba(44, 44, 44, 0.8);
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 15px;
     border: 2px solid rgba(255, 69, 0, 0.3);
     min-height: 100%;
@@ -1068,12 +1065,12 @@ section {
 
 .token-stats-header {
     font-family: var(--font-primary);
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: var(--phoenix-orange);
     text-align: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.8rem;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.6rem;
     border-bottom: 2px solid rgba(255, 107, 53, 0.3);
     background: var(--flame-gradient);
     -webkit-background-clip: text;
@@ -1084,11 +1081,11 @@ section {
 .stat-card {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.6rem;
     background: rgba(44, 44, 44, 0.6);
-    padding: 0.8rem;
-    border-radius: 10px;
-    border-left: 4px solid var(--phoenix-orange);
+    padding: 0.5rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--phoenix-orange);
 }
 
 .stat-icon {
@@ -1413,7 +1410,7 @@ section {
 }
 
 /* Three columns on large screens, two on medium, one on mobile */
-@media (max-width: 1100px) {
+@media (max-width: 980px) {
     .token-grid {
         grid-template-columns: 1fr 1fr;
         gap: 1.5rem;
