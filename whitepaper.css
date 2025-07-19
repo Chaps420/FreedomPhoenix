@@ -1,0 +1,626 @@
+/* Whitepaper Specific Styles */
+
+.whitepaper-main {
+    padding-top: 100px;
+    min-height: 100vh;
+}
+
+.whitepaper-header {
+    text-align: center;
+    padding: 80px 0;
+    margin-bottom: 60px;
+    background: linear-gradient(135deg, rgba(255, 69, 0, 0.1), rgba(139, 0, 0, 0.05));
+    border-radius: 20px;
+    border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.whitepaper-title {
+    font-family: var(--font-primary);
+    margin: 30px 0 20px 0;
+}
+
+.title-main {
+    display: block;
+    font-size: 3.5rem;
+    font-weight: 700;
+    background: var(--flame-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.title-subtitle {
+    display: block;
+    font-size: 2rem;
+    color: var(--phoenix-orange);
+    font-weight: 400;
+}
+
+.whitepaper-subtitle {
+    font-size: 1.4rem;
+    color: var(--phoenix-yellow);
+    margin: 20px 0 40px 0;
+    font-weight: 300;
+}
+
+.whitepaper-meta {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ccc;
+    font-size: 1rem;
+}
+
+.meta-item i {
+    color: var(--phoenix-orange);
+}
+
+/* Table of Contents */
+.table-of-contents {
+    background: rgba(28, 28, 28, 0.8);
+    border-radius: 15px;
+    padding: 40px;
+    margin-bottom: 60px;
+    border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.table-of-contents h2 {
+    color: var(--phoenix-orange);
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toc-nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.toc-nav > ul > li {
+    margin-bottom: 20px;
+}
+
+.toc-nav li ul {
+    margin-top: 10px;
+    margin-left: 30px;
+}
+
+.toc-nav li ul li {
+    margin-bottom: 8px;
+}
+
+.toc-nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: block;
+    border-left: 3px solid transparent;
+}
+
+.toc-nav a:hover {
+    color: var(--phoenix-orange);
+    background: rgba(255, 69, 0, 0.1);
+    border-left-color: var(--phoenix-orange);
+    transform: translateX(5px);
+}
+
+/* Whitepaper Sections */
+.whitepaper-section {
+    margin-bottom: 80px;
+}
+
+.whitepaper-section .section-title {
+    font-family: var(--font-primary);
+    font-size: 2.5rem;
+    color: var(--phoenix-orange);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid var(--phoenix-orange);
+    padding-bottom: 15px;
+}
+
+.subsection {
+    margin-bottom: 50px;
+}
+
+.subsection h3 {
+    font-family: var(--font-primary);
+    font-size: 1.8rem;
+    color: var(--phoenix-yellow);
+    margin-bottom: 25px;
+    padding-left: 20px;
+    border-left: 4px solid var(--phoenix-orange);
+}
+
+.subsection h4 {
+    font-size: 1.4rem;
+    color: var(--phoenix-orange);
+    margin: 30px 0 20px 0;
+    font-weight: 600;
+}
+
+.subsection h5 {
+    font-size: 1.2rem;
+    color: var(--phoenix-yellow);
+    margin: 20px 0 15px 0;
+    font-weight: 500;
+}
+
+.content-card {
+    background: rgba(28, 28, 28, 0.6);
+    border-radius: 15px;
+    padding: 40px;
+    border: 1px solid rgba(255, 69, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.content-card p {
+    line-height: 1.8;
+    margin-bottom: 20px;
+    color: #e0e0e0;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    margin-bottom: 15px;
+    padding-left: 25px;
+    position: relative;
+    line-height: 1.6;
+    color: #e0e0e0;
+}
+
+.feature-list li::before {
+    content: "🔥";
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* Tokenomics Grid */
+.tokenomics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.tokenomics-card {
+    background: linear-gradient(135deg, rgba(255, 69, 0, 0.1), rgba(139, 0, 0, 0.05));
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid rgba(255, 69, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tokenomics-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 69, 0, 0.2);
+}
+
+.tokenomics-icon {
+    font-size: 2.5rem;
+    color: var(--phoenix-orange);
+    margin-bottom: 20px;
+}
+
+.tokenomics-card h4 {
+    color: var(--phoenix-yellow);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.tokenomics-card .highlight {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--phoenix-orange);
+    margin-bottom: 10px;
+}
+
+.tokenomics-card small {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* Allocation List */
+.allocation-list {
+    margin-top: 30px;
+}
+
+.allocation-item {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 69, 0, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 4px solid var(--phoenix-orange);
+    transition: background 0.3s ease;
+}
+
+.allocation-item:hover {
+    background: rgba(255, 69, 0, 0.1);
+}
+
+.allocation-label {
+    font-weight: 600;
+    color: var(--phoenix-yellow);
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.allocation-value {
+    font-weight: 700;
+    color: var(--phoenix-orange);
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.allocation-item small {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* Compounding Flow */
+.compounding-flow {
+    margin: 40px 0;
+}
+
+.flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: rgba(255, 69, 0, 0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.step-number {
+    background: var(--phoenix-gradient);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.step-content h5 {
+    color: var(--phoenix-yellow);
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.step-content p {
+    color: #e0e0e0;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Guide Steps */
+.guide-steps {
+    margin-top: 30px;
+}
+
+.guide-step {
+    background: rgba(28, 28, 28, 0.8);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 69, 0, 0.2);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.guide-step .step-number {
+    background: var(--ember-gradient);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.guide-step h5 {
+    color: var(--phoenix-yellow);
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.guide-step ul {
+    list-style: none;
+    padding: 0;
+}
+
+.guide-step li {
+    margin-bottom: 10px;
+    padding-left: 25px;
+    position: relative;
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+
+.guide-step li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--phoenix-orange);
+    font-weight: bold;
+}
+
+/* NFT Stats */
+.nft-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.nft-stat {
+    background: linear-gradient(135deg, rgba(255, 69, 0, 0.1), rgba(139, 0, 0, 0.05));
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid rgba(255, 69, 0, 0.3);
+}
+
+.nft-stat .stat-icon {
+    font-size: 2.5rem;
+    color: var(--phoenix-orange);
+    margin-bottom: 20px;
+}
+
+.nft-stat h4 {
+    color: var(--phoenix-yellow);
+    margin-bottom: 15px;
+}
+
+.nft-stat p {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--phoenix-orange);
+    margin-bottom: 10px;
+}
+
+/* Rarity Grid */
+.rarity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.rarity-card {
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    border: 2px solid;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rarity-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.rarity-card.common {
+    background: rgba(169, 169, 169, 0.1);
+    border-color: #a9a9a9;
+}
+
+.rarity-card.uncommon {
+    background: rgba(0, 128, 0, 0.1);
+    border-color: #008000;
+}
+
+.rarity-card.rare {
+    background: rgba(0, 112, 255, 0.1);
+    border-color: #0070ff;
+}
+
+.rarity-card.mythic {
+    background: rgba(128, 0, 128, 0.1);
+    border-color: #800080;
+}
+
+.rarity-card.legendary {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: #ffd700;
+}
+
+.rarity-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}
+
+.rarity-card h5 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.rarity-percent {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+/* Minting Info */
+.minting-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin: 30px 0;
+}
+
+.minting-card {
+    background: rgba(28, 28, 28, 0.8);
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    border: 1px solid rgba(255, 69, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.minting-card:hover {
+    transform: translateY(-5px);
+}
+
+.minting-icon {
+    font-size: 2.5rem;
+    color: var(--phoenix-orange);
+    margin-bottom: 20px;
+}
+
+.minting-card h4 {
+    color: var(--phoenix-yellow);
+    margin-bottom: 15px;
+}
+
+.minting-card .price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--phoenix-orange);
+    margin-bottom: 10px;
+}
+
+.minting-card p {
+    font-weight: 600;
+    color: var(--phoenix-orange);
+    margin-bottom: 10px;
+}
+
+/* Conclusion */
+.conclusion-card {
+    background: linear-gradient(135deg, rgba(255, 69, 0, 0.1), rgba(139, 0, 0, 0.05));
+    border: 2px solid var(--phoenix-orange);
+}
+
+.conclusion-points {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+}
+
+.conclusion-point {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: rgba(28, 28, 28, 0.6);
+    border-radius: 10px;
+    border-left: 4px solid var(--phoenix-orange);
+}
+
+.conclusion-point i {
+    font-size: 1.5rem;
+    color: var(--phoenix-orange);
+}
+
+.conclusion-point p {
+    margin: 0;
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+
+/* Navigation Active State */
+.nav-link.active {
+    color: var(--phoenix-orange) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .title-main {
+        font-size: 2.5rem;
+    }
+    
+    .title-subtitle {
+        font-size: 1.5rem;
+    }
+    
+    .whitepaper-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .whitepaper-meta {
+        gap: 20px;
+    }
+    
+    .table-of-contents {
+        padding: 25px;
+    }
+    
+    .content-card {
+        padding: 25px;
+    }
+    
+    .flow-step {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .step-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .tokenomics-grid,
+    .nft-stats,
+    .rarity-grid,
+    .minting-info,
+    .conclusion-points {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .whitepaper-header {
+        padding: 40px 20px;
+    }
+    
+    .title-main {
+        font-size: 2rem;
+    }
+    
+    .title-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .whitepaper-section .section-title {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}

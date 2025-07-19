@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freedom Phoenix - Rise from the Ashes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="flame-background">
+        <div class="flame flame-1"></div>
+        <div class="flame flame-2"></div>
+        <div class="flame flame-3"></div>
+        <div class="flame flame-4"></div>
+        <div class="flame flame-5"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-fire-flame-curved"></i>
+                <span>Freedom Phoenix</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#radio" class="nav-link">Jungle Radio</a></li>
+                <li><a href="#token" class="nav-link">$FPT Token</a></li>
+                <li><a href="#nft" class="nav-link">NFT Collection</a></li>
+                <li><a href="whitepaper.html" class="nav-link">White Paper</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Top Right Phoenix -->
+    <div class="top-phoenix">
+        <img src="phoenix.png" alt="Phoenix" class="top-phoenix-img">
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="title-line">
+                    <i class="fas fa-fire-flame-curved flame-icon-left"></i>
+                    Freedom Phoenix
+                    <i class="fas fa-fire-flame-curved flame-icon-right"></i>
+                </span>
+                <span class="title-subtitle">Rise from the Ashes</span>
+            </h1>
+            <p class="hero-description">
+                <span class="animate-word word-1">EXPERIENCE</span> <span class="animate-word word-2">THE</span> <span class="animate-word word-3">REBIRTH</span> <span class="animate-word word-4">OF</span> <span class="animate-word word-5 highlight">DIGITAL</span> <span class="animate-word word-6 highlight">FREEDOM</span> <span class="animate-word word-7">THROUGH</span> <span class="animate-word word-8 glow">MUSIC,</span> <span class="animate-word word-9 glow">TOKENS,</span> <span class="animate-word word-10">AND</span> <span class="animate-word word-11 glow">NFTS</span>
+            </p>
+            <div class="hero-buttons">
+                <a href="#radio" class="btn btn-primary">
+                    <i class="fas fa-play"></i>
+                    Listen Now
+                </a>
+                <a href="#token" class="btn btn-secondary">
+                    <i class="fas fa-coins"></i>
+                    Get $FPT
+                </a>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Jungle Radio Section -->
+    <section id="radio" class="radio-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-radio"></i>
+                Jungle Radio
+            </h2>
+            <div class="radio-player">
+                <div class="radio-header">
+                    <p class="radio-brand">Freedom Phoenix Originals</p>
+                </div>
+                <div class="radio-visualizer">
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                    <div class="visualizer-bar"></div>
+                </div>
+                <div class="radio-controls">
+                    <button class="control-btn" id="prevBtn">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                    <button class="control-btn play-pause" id="playBtn">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="control-btn" id="nextBtn">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                    <button class="control-btn" id="shuffleBtn">
+                        <i class="fas fa-shuffle"></i>
+                    </button>
+                </div>
+                <div class="radio-info">
+                    <div class="track-info">
+                        <h3 id="trackTitle">Select a song to play</h3>
+                        <p id="trackArtist">Freedom Phoenix Radio</p>
+                    </div>
+                    <div class="volume-control">
+                        <i class="fas fa-volume-up"></i>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="50">
+                    </div>
+                </div>
+                <!-- Hidden audio element for playing music -->
+                <audio id="audioPlayer" preload="none"></audio>
+                <div class="song-request">
+                    <h3>Song Request Line</h3>
+                    <form id="songRequestForm" class="request-form">
+                        <div class="form-group">
+                            <label for="youtubeUrl">YouTube URL:</label>
+                            <input type="url" id="youtubeUrl" name="youtubeUrl" placeholder="Enter YouTube or YouTube Music URL only..." required>
+                            <small style="color: rgba(255, 255, 255, 0.6); font-size: 0.75rem; margin-top: 2px; display: block;">
+                                Security Notice: Only YouTube and YouTube Music links are accepted
+                            </small>
+                        </div>
+                        <div class="form-group">
+                            <label for="requesterName">Your Name:</label>
+                            <input type="text" id="requesterName" name="requesterName" placeholder="Enter your name" required maxlength="50">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Add to Queue
+                        </button>
+                    </form>
+                    <div id="requestStatus" class="request-status"></div>
+                    <div class="queue-info">
+                        <h4>Current Queue</h4>
+                        <div id="queueDisplay" class="queue-display">
+                            <p class="loading">Loading queue...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Token Section -->
+    <section id="token" class="token-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-coins"></i>
+                Freedom Phoenix Token
+                <button id="refreshTokenData" class="refresh-btn" title="Refresh token data">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </h2>
+            <div class="token-grid">
+                <div class="token-card">
+                    <h3>$FPT Token</h3>
+                    <p>The official token of the Freedom Phoenix ecosystem</p>
+                    <div class="token-links">
+                        <a href="whitepaper.html" class="token-link">
+                            <i class="fas fa-file-alt"></i>
+                            White Paper
+                        </a>
+                        <a href="https://xmagnetic.org/tokens/FPT%2BrBXRBN9gSFE4qL6DGWYHgKCLtoMzUVL5cF?network=mainnet&currency=FPT&issuer=rBXRBN9gSFE4qL6DGWYHgKCLtoMzUVL5cF" target="_blank" class="token-link">
+                            <i class="fas fa-link"></i>
+                            $FPT Trustline
+                        </a>
+                        <a href="https://firstledger.net/token/rBXRBN9gSFE4qL6DGWYHgKCLtoMzUVL5cF/FPT" target="_blank" class="token-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            Buy $FPT on First Ledger
+                        </a>
+                        <a href="https://opulfi.opulencex.io/opulfarming/fptxrp" target="_blank" class="token-link">
+                            <i class="fas fa-seedling"></i>
+                            Farm $FPT on OpulenceX
+                        </a>
+                        <a href="https://opulfi.opulencex.io/opulgainz/honeycomb/6829cc15bf052c3b56ee2d83" target="_blank" class="token-link">
+                            <i class="fas fa-th"></i>
+                            Honeycomb
+                        </a>
+                        <a href="https://xmagnetic.org/tokens/ODC%2Brh8EXR5mUz9CJNiHeVQVx4LpChFJ86w5nx?network=mainnet&currency=ODC&issuer=rh8EXR5mUz9CJNiHeVQVx4LpChFJ86w5nx" target="_blank" class="token-link">
+                            <i class="fas fa-link"></i>
+                            $ODC Trustline
+                        </a>
+                        <a href="https://firstledger.net/token/rh8EXR5mUz9CJNiHeVQVx4LpChFJ86w5nx/ODC" target="_blank" class="token-link">
+                            <i class="fas fa-shopping-cart"></i>
+                            Buy $ODC on First Ledger
+                        </a>
+                        <a href="https://opulfi.opulencex.io/opulfarming/odcxrp" target="_blank" class="token-link">
+                            <i class="fas fa-seedling"></i>
+                            Farm $ODC on OpulenceX
+                        </a>
+                        <a href="https://x.com/FreedomPhoenixT" target="_blank" class="token-link">
+                            <i class="fab fa-x-twitter"></i>
+                            Follow on X
+                        </a>
+                    </div>
+                </div>
+                <div class="token-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Market Cap</h4>
+                            <p class="stat-value">$37.15k</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Holders</h4>
+                            <p class="stat-value">254</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Price</h4>
+                            <p class="stat-value">$0.0000391</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Supply</h4>
+                            <p class="stat-value">949M</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>24h Volume</h4>
+                            <p class="stat-value">2.44k XRP</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h4>Liquidity</h4>
+                            <p class="stat-value">$12.94k</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NFT Section -->
+    <section id="nft" class="nft-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-gem"></i>
+                Odyssey NFT Collection
+            </h2>
+            <div class="nft-showcase">
+                <div class="nft-card featured">
+                    <div class="nft-image">
+                        <img src="https://cdn.xrp.cafe/ad1318fda7bd-4c91-afbe-210d1910dfcf.webp" alt="Freedom Phoenix Odyssey NFT" class="nft-img">
+                        <div class="nft-overlay">
+                            <a href="https://xrp.cafe/collection/freedom-phoenix-odyssey" target="_blank" class="btn btn-primary">
+                                View Collection
+                            </a>
+                        </div>
+                    </div>
+                    <div class="nft-info">
+                        <h3>Freedom Phoenix Odyssey</h3>
+                        <p>Exclusive NFT collection on XRP.Cafe</p>
+                        <div class="nft-meta">
+                            <span class="nft-price">
+                                <i class="fab fa-ethereum"></i>
+                                Limited Edition
+                            </span>
+                            <span class="nft-rarity">
+                                <i class="fas fa-star"></i>
+                                Rare
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-fire-flame-curved"></i>
+                        <span>Freedom Phoenix</span>
+                    </div>
+                    <p style="white-space: nowrap;">Rising from the ashes, soaring to new heights</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#radio">Jungle Radio</a></li>
+                            <li><a href="#token">$FPT Token</a></li>
+                            <li><a href="#nft">NFT Collection</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="whitepaper.html">White Paper</a></li>
+                            <li><a href="https://firstledger.net/token/rBXRBN9gSFE4qL6DGWYHgKCLtoMzUVL5cF/FPT" target="_blank">Buy Token</a></li>
+                            <li><a href="https://xrp.cafe/collection/freedom-phoenix-odyssey" target="_blank">NFT Collection</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Freedom Phoenix. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+Newsletter
+Stay updated with the latest news
+
+Community
+Join our growing community
