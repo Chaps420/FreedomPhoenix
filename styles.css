@@ -443,6 +443,34 @@ body {
     transform: translateY(-3px);
 }
 
+.btn-live {
+    background: linear-gradient(135deg, #8e44ad, #e74c3c);
+    color: white;
+    border: 2px solid #8e44ad;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-live:hover {
+    background: linear-gradient(135deg, #a855c7, #ff4757);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(142, 68, 173, 0.4);
+}
+
+.btn-live::before {
+    content: '🔴';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: live-pulse 2s infinite;
+}
+
+@keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
 .btn-stream {
     background: linear-gradient(135deg, #e74c3c, #ff0000);
     color: white;
