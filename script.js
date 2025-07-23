@@ -413,10 +413,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const requestArray = Object.keys(requests).map(key => ({
                 id: key,
                 ...requests[key]
-            })).sort((a, b) => a.timestamp - b.timestamp);
+            })).sort((a, b) => b.timestamp - a.timestamp); // Changed to reverse chronological order (newest first)
             
             let html = '';
-            requestArray.slice(0, 10).forEach((request, index) => {
+            requestArray.forEach((request, index) => { // Removed slice(0, 10) to show all songs
                 html += `
                     <div class="queue-item" style="border-bottom: 1px solid rgba(255, 107, 53, 0.2); padding: 10px 0;">
                         <div style="display: flex; align-items: flex-start;">
@@ -428,6 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <div class="queue-requester" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 4px;">
                                     Requested by ${this.escapeHtml(request.requesterName)}
                                 </div>
+                                <div class="queue-timestamp" style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 4px;">
+                                    ${this.formatTimestamp(request.timestamp)}
+                                </div>
                                 <a href="${request.url}" target="_blank" style="color: var(--phoenix-orange); font-size: 0.8rem; text-decoration: none; opacity: 0.8;">
                                     🔗 View Original
                                 </a>
@@ -436,10 +439,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
             });
-            
-            if (requestArray.length > 10) {
-                html += `<div class="queue-item"><div class="queue-position">...</div><div class="queue-song-info"><div class="queue-song-title">+${requestArray.length - 10} more songs in queue</div></div></div>`;
-            }
             
             this.queueDisplay.innerHTML = html;
         }
@@ -451,6 +450,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 /^(https?:\/\/)?(music\.)?youtube\.com\//
             ];
             return validPatterns.some(pattern => pattern.test(url));
+        }
+        
+        formatTimestamp(timestamp) {
+            if (!timestamp) return 'Unknown time';
+            try {
+                const date = new Date(parseInt(timestamp));
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                
+                if (diffMins < 1) return 'Just now';
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+                
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+                });
+            } catch (e) {
+                return 'Unknown time';
+            }
         }
         
         extractSongTitle(url) {
