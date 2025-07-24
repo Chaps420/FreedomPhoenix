@@ -308,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.requestForm = document.getElementById('songRequestForm');
             this.statusDiv = document.getElementById('requestStatus');
             this.queueDisplay = document.getElementById('queueDisplay');
+            this.titleCache = new Map(); // Cache for YouTube titles to prevent excessive API calls
             
             this.initializeFirebase();
         }
@@ -371,7 +372,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             try {
-                const songTitle = this.extractSongTitle(youtubeUrl);
+                this.showStatus('Fetching video information...', 'info');
+                const songTitle = await this.fetchYouTubeTitle(youtubeUrl);
                 const requestData = {
                     url: youtubeUrl.trim(),
                     requesterName: this.sanitizeInput(requesterName.trim()),
@@ -392,8 +394,8 @@ document.addEventListener('DOMContentLoaded', function() {
         loadQueue() {
             if (!this.database || !this.queueDisplay) return;
             
-            this.onValue(this.ref(this.database, 'songs'), (snapshot) => {
-                this.displayQueue(snapshot.val());
+            this.onValue(this.ref(this.database, 'songs'), async (snapshot) => {
+                await this.displayQueue(snapshot.val());
             }, (error) => {
                 console.error('Failed to load queue:', error);
                 if (this.queueDisplay) {
@@ -402,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        displayQueue(requests) {
+        async displayQueue(requests) {
             if (!this.queueDisplay) return;
             
             if (!requests) {
@@ -415,15 +417,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 ...requests[key]
             })).sort((a, b) => b.timestamp - a.timestamp); // Changed to reverse chronological order (newest first)
             
+            // Show initial content with loading indicators
             let html = '';
-            requestArray.forEach((request, index) => { // Removed slice(0, 10) to show all songs
+            requestArray.forEach((request, index) => {
+                // Better detection for video IDs that need fetching
+                const isVideoId = /^[a-zA-Z0-9_-]{11}$/.test(request.title); // YouTube video IDs are 11 characters
+                const needsTitleFetch = !request.title || 
+                                      request.title === 'Unknown Song' || 
+                                      request.title === 'YouTube Song' || 
+                                      request.title.length < 3 ||
+                                      isVideoId;
+                
+                const displayTitle = needsTitleFetch ? '⏳ Loading title...' : request.title;
+                
+                console.log('Queue item:', {
+                    title: request.title,
+                    isVideoId,
+                    needsTitleFetch,
+                    displayTitle
+                });
+                
                 html += `
                     <div class="queue-item" style="border-bottom: 1px solid rgba(255, 107, 53, 0.2); padding: 10px 0;">
                         <div style="display: flex; align-items: flex-start;">
                             <div class="queue-position" style="margin-right: 10px; min-width: 30px;">#${index + 1}</div>
                             <div class="queue-song-info" style="flex: 1;">
-                                <div class="queue-song-title" style="font-weight: bold; color: var(--phoenix-orange); margin-bottom: 4px;">
-                                    ${this.escapeHtml(request.title || 'Unknown Song')}
+                                <div class="queue-song-title" id="title-${request.id}" style="font-weight: bold; color: var(--phoenix-orange); margin-bottom: 4px;">
+                                    ${this.escapeHtml(displayTitle)}
                                 </div>
                                 <div class="queue-requester" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 4px;">
                                     Requested by ${this.escapeHtml(request.requesterName)}
@@ -441,6 +461,42 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             this.queueDisplay.innerHTML = html;
+            
+            // Now fetch real titles for those that need it
+            for (let index = 0; index < requestArray.length; index++) {
+                const request = requestArray[index];
+                const isVideoId = /^[a-zA-Z0-9_-]{11}$/.test(request.title);
+                const needsTitleFetch = !request.title || 
+                                      request.title === 'Unknown Song' || 
+                                      request.title === 'YouTube Song' || 
+                                      request.title.length < 3 ||
+                                      isVideoId;
+                
+                console.log('Checking if needs fetch:', {
+                    title: request.title,
+                    isVideoId,
+                    needsTitleFetch,
+                    url: request.url
+                });
+                
+                if (needsTitleFetch) {
+                    console.log('Fetching title for:', request.url);
+                    try {
+                        const realTitle = await this.fetchYouTubeTitle(request.url);
+                        console.log('Got real title:', realTitle);
+                        const titleElement = document.getElementById(`title-${request.id}`);
+                        if (titleElement) {
+                            titleElement.textContent = realTitle;
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch title for:', request.url, error);
+                        const titleElement = document.getElementById(`title-${request.id}`);
+                        if (titleElement) {
+                            titleElement.textContent = request.title || 'Unknown Song';
+                        }
+                    }
+                }
+            }
         }
         
         isValidMusicUrl(url) {
@@ -477,6 +533,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        async fetchYouTubeTitle(url) {
+            console.log('fetchYouTubeTitle called with:', url);
+            
+            // Check cache first
+            if (this.titleCache.has(url)) {
+                console.log('Using cached title for:', url);
+                return this.titleCache.get(url);
+            }
+            
+            try {
+                // Use YouTube oEmbed API to get video information
+                const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+                console.log('Making oEmbed request to:', oEmbedUrl);
+                
+                const response = await fetch(oEmbedUrl);
+                console.log('oEmbed response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`oEmbed API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('oEmbed data received:', data);
+                const title = data.title || this.extractSongTitle(url);
+                
+                // Cache the result for 5 minutes
+                this.titleCache.set(url, title);
+                setTimeout(() => this.titleCache.delete(url), 5 * 60 * 1000);
+                
+                return title;
+            } catch (error) {
+                console.error('Error fetching YouTube title:', error);
+                // Fallback to basic extraction
+                const fallbackTitle = this.extractSongTitle(url);
+                
+                // Cache fallback for 1 minute (shorter time for failed requests)
+                this.titleCache.set(url, fallbackTitle);
+                setTimeout(() => this.titleCache.delete(url), 60 * 1000);
+                
+                return fallbackTitle;
+            }
+        }
+
         extractSongTitle(url) {
             if (!url) return 'Unknown Song';
             try {

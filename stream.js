@@ -53,10 +53,10 @@ class YouTubeStream {
         }
 
         // Listen for current video changes
-        this.database.ref('stream/current').on('value', (snapshot) => {
+        this.database.ref('stream/current').on('value', async (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                this.handleStreamUpdate(data);
+                await this.handleStreamUpdate(data);
             } else {
                 console.log('No current stream data found');
                 this.handleNoStreamData();
@@ -118,7 +118,7 @@ class YouTubeStream {
         this.showLoading();
     }
 
-    handleStreamUpdate(streamData) {
+    async handleStreamUpdate(streamData) {
         console.log('Stream update received:', streamData);
         
         if (!streamData.videoId) {
@@ -140,7 +140,7 @@ class YouTubeStream {
             state: streamData.state || 'playing'
         };
 
-        this.updateVideoInfo();
+        await this.updateVideoInfo();
         
         // Load/sync video if player is ready
         if (this.isPlayerReady) {
@@ -209,11 +209,51 @@ class YouTubeStream {
         }
     }
 
-    updateVideoInfo() {
+    async updateVideoInfo() {
         if (!this.currentVideo) return;
 
+        console.log('updateVideoInfo called with currentVideo:', this.currentVideo);
+
+        // Get real YouTube title using oEmbed API
+        let displayTitle = this.currentVideo.title;
+        console.log('Initial title:', displayTitle, 'VideoId:', this.currentVideo.videoId);
+        
+        const needsFetch = !displayTitle || 
+                          displayTitle === this.currentVideo.videoId || 
+                          displayTitle.length < 3 || 
+                          displayTitle.startsWith('Video ');
+        
+        console.log('Needs fetch?', needsFetch, 'Conditions:', {
+            noTitle: !displayTitle,
+            titleEqualsId: displayTitle === this.currentVideo.videoId,
+            tooShort: displayTitle.length < 3,
+            startsWithVideo: displayTitle.startsWith('Video ')
+        });
+        
+        if (needsFetch) {
+            console.log('Need to fetch YouTube title for:', this.currentVideo.videoId);
+            try {
+                const videoUrl = `https://www.youtube.com/watch?v=${this.currentVideo.videoId}`;
+                console.log('Fetching from oEmbed API:', videoUrl);
+                const response = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`);
+                console.log('oEmbed response status:', response.status);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('oEmbed data received:', data);
+                    displayTitle = data.title || this.currentVideo.title || `Video ${this.currentVideo.videoId}`;
+                    console.log('New title:', displayTitle);
+                } else {
+                    console.error('oEmbed API failed with status:', response.status);
+                }
+            } catch (error) {
+                console.error('Failed to fetch YouTube title:', error);
+                displayTitle = this.currentVideo.title || `Video ${this.currentVideo.videoId}`;
+            }
+        }
+
         if (this.elements.videoTitle) {
-            this.elements.videoTitle.textContent = this.currentVideo.title;
+            console.log('Setting video title to:', displayTitle);
+            this.elements.videoTitle.textContent = displayTitle;
         }
         
         if (this.elements.videoDescription) {
@@ -364,7 +404,7 @@ class YouTubeStream {
             if (this.streamManager) {
                 const currentVideo = this.streamManager.setCurrentVideo(video);
                 this.currentVideo = currentVideo;
-                this.updateVideoInfo();
+                await this.updateVideoInfo();
             }
             
         } catch (error) {

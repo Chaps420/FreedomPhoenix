@@ -226,6 +226,224 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* Enhanced Video Information Panel */
+        .video-info-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .now-playing-section h3,
+        .up-next-section h3 {
+            color: var(--phoenix-orange);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .video-details-enhanced {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .video-thumbnail-enhanced {
+            position: relative;
+            width: 120px;
+            height: 90px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-thumbnail-enhanced img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .live-indicator-enhanced {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .live-dot-enhanced {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse-enhanced 2s infinite;
+        }
+
+        @keyframes pulse-enhanced {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .video-meta-enhanced h4 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .video-meta-enhanced p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .video-description-enhanced {
+            font-size: 0.8rem !important;
+            color: rgba(255, 255, 255, 0.6) !important;
+            max-height: 60px;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .video-stats-enhanced {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .video-stats-enhanced span {
+            color: var(--phoenix-orange);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .video-stats-enhanced i {
+            color: rgba(255, 107, 53, 0.8);
+        }
+
+        /* Up Next Section */
+        .up-next-container {
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .up-next-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--phoenix-orange);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .up-next-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+            transform: translateX(5px);
+        }
+
+        .queue-position {
+            color: var(--phoenix-orange);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .queue-song-title {
+            color: #fff;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .queue-requester {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        .queue-timestamp {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+        }
+
+        .loading {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* Custom Scrollbar for Up Next */
+        .up-next-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .up-next-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .up-next-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--phoenix-orange), #ff8c42);
+            border-radius: 3px;
+        }
+
+        .up-next-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff8c42, var(--phoenix-orange));
+        }
+
+        /* Mobile Responsive for Enhanced Panel */
+        @media (max-width: 768px) {
+            .video-info-panel {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .video-details-enhanced {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .video-thumbnail-enhanced {
+                width: 100%;
+                height: 180px;
+                margin: 0 auto;
+            }
+            
+            .video-stats-enhanced {
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .up-next-container {
+                max-height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -295,6 +513,39 @@
             </div>
         </div>
 
+        <!-- Enhanced Video Information Panel -->
+        <div class="video-info-panel">
+            <div class="now-playing-section">
+                <h3><i class="fas fa-music"></i> Now Playing</h3>
+                <div id="currentVideoInfo" class="video-details-enhanced">
+                    <div class="video-thumbnail-enhanced">
+                        <img id="currentThumbnail" src="" alt="Current video thumbnail">
+                        <div class="live-indicator-enhanced">
+                            <span class="live-dot-enhanced"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="video-meta-enhanced">
+                        <h4 id="currentTitle">Loading current track...</h4>
+                        <p id="currentChannel">Freedom Phoenix Radio</p>
+                        <div class="video-stats-enhanced">
+                            <span id="currentViews"><i class="fas fa-eye"></i> Loading...</span>
+                            <span id="currentDuration"><i class="fas fa-clock"></i> Live Stream</span>
+                            <span id="streamStatus"><i class="fas fa-broadcast-tower"></i> 24/7 Active</span>
+                        </div>
+                        <p id="currentDescription" class="video-description-enhanced">Getting video information...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="up-next-section">
+                <h3><i class="fas fa-forward"></i> Up Next</h3>
+                <div id="upNextQueue" class="up-next-container">
+                    <p class="loading">Loading upcoming songs...</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Stream Controls -->
         <div class="stream-controls">
             <button id="mute-btn" class="control-btn">
@@ -349,6 +600,311 @@
             hamburger.classList.remove('active');
             navMenu.classList.remove('active');
         }));
+
+        // Stream Information Manager
+        class StreamInfo {
+            constructor() {
+                this.currentVideoUrl = null; // Will be fetched from Firebase
+                this.currentVideoId = null;
+                this.titleCache = new Map(); // Cache for YouTube titles
+                this.firebaseConfig = {
+                    apiKey: "AIzaSyBiwWy-J_C83MWeD88ZODIw2H6r2suUPTY",
+                    authDomain: "fpt-radio.firebaseapp.com",
+                    databaseURL: "https://fpt-radio-default-rtdb.firebaseio.com",
+                    projectId: "fpt-radio",
+                    storageBucket: "fpt-radio.firebasestorage.app",
+                    messagingSenderId: "121288710296",
+                    appId: "1:121288710296:web:041addd1c3a91f2c8f58ed"
+                };
+                this.init();
+            }
+
+            init() {
+                this.initFirebase();
+                
+                // Initial load
+                this.loadCurrentStreamInfo();
+                this.loadStreamPlaylist();
+                
+                // Refresh current video info every 2 minutes (more frequent for stream)
+                setInterval(() => {
+                    this.loadCurrentStreamInfo();
+                }, 120000);
+
+                // Refresh playlist every 30 seconds
+                setInterval(() => {
+                    this.loadStreamPlaylist();
+                }, 30000);
+            }
+
+            initFirebase() {
+                if (typeof firebase !== 'undefined') {
+                    firebase.initializeApp(this.firebaseConfig);
+                    this.database = firebase.database();
+                    console.log('Firebase initialized for StreamInfo');
+                } else {
+                    console.error('Firebase not loaded');
+                }
+            }
+
+            // Extract video ID from YouTube URL
+            extractVideoId(url) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+            }
+
+            // Get video info using oEmbed (free, no API key required) with caching
+            async getVideoInfoOEmbed(videoUrl) {
+                console.log('Fetching video info for:', videoUrl);
+                
+                // Check cache first
+                if (this.titleCache.has(videoUrl)) {
+                    console.log('Using cached result for:', videoUrl);
+                    return this.titleCache.get(videoUrl);
+                }
+                
+                try {
+                    const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`;
+                    console.log('Making oEmbed request to:', oEmbedUrl);
+                    
+                    const response = await fetch(oEmbedUrl);
+                    console.log('oEmbed response status:', response.status);
+                    
+                    if (!response.ok) {
+                        console.error('oEmbed API error:', response.status, response.statusText);
+                        throw new Error(`Failed to fetch video info: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('oEmbed data received:', data);
+                    
+                    // Cache the result for 5 minutes
+                    this.titleCache.set(videoUrl, data);
+                    setTimeout(() => this.titleCache.delete(videoUrl), 5 * 60 * 1000);
+                    
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching video info via oEmbed:', error);
+                    
+                    // Cache null result for 1 minute to prevent repeated failed calls
+                    this.titleCache.set(videoUrl, null);
+                    setTimeout(() => this.titleCache.delete(videoUrl), 60 * 1000);
+                    
+                    return null;
+                }
+            }
+
+            // Load current stream information from Firebase
+            async loadCurrentStreamInfo() {
+                if (!this.database) {
+                    console.error('Firebase database not initialized');
+                    return;
+                }
+
+                try {
+                    // Get current video from Firebase stream data
+                    const streamRef = this.database.ref('stream/currentVideo');
+                    streamRef.once('value', async (snapshot) => {
+                        const currentVideo = snapshot.val();
+                        
+                        if (currentVideo && currentVideo.videoId) {
+                            this.currentVideoId = currentVideo.videoId;
+                            this.currentVideoUrl = `https://www.youtube.com/watch?v=${currentVideo.videoId}`;
+                            
+                            // Get video info from YouTube using oEmbed
+                            const videoData = await this.getVideoInfoOEmbed(this.currentVideoUrl);
+                            
+                            if (videoData) {
+                                this.updateCurrentVideoDisplay(videoData, currentVideo);
+                            } else {
+                                // If oEmbed fails, try to use any title from Firebase or show fallback
+                                const fallbackTitle = currentVideo.title && currentVideo.title !== currentVideo.videoId 
+                                    ? currentVideo.title 
+                                    : 'Freedom Phoenix Live Stream';
+                                this.showFallbackCurrentVideo({
+                                    ...currentVideo,
+                                    title: fallbackTitle
+                                });
+                            }
+                        } else {
+                            // No current video in Firebase, show fallback
+                            this.showDefaultCurrentVideo();
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error loading current stream info:', error);
+                    this.showDefaultCurrentVideo();
+                }
+            }
+
+            // Load stream playlist (up next) from Firebase
+            loadStreamPlaylist() {
+                if (!this.database) {
+                    console.error('Firebase database not initialized');
+                    return;
+                }
+
+                const playlistRef = this.database.ref('stream/playlist');
+                playlistRef.on('value', async (snapshot) => {
+                    const playlist = snapshot.val();
+                    await this.displayStreamPlaylist(playlist);
+                }, (error) => {
+                    console.error('Error loading stream playlist:', error);
+                    document.getElementById('upNextQueue').innerHTML = '<p class="loading">Unable to load playlist. Please try again later.</p>';
+                });
+            }
+
+            // Update current video display with YouTube data
+            updateCurrentVideoDisplay(videoData, currentVideo) {
+                document.getElementById('currentTitle').textContent = videoData.title || 'Freedom Phoenix Live Stream';
+                document.getElementById('currentChannel').textContent = videoData.author_name || 'Freedom Phoenix Radio';
+                
+                // Try to get description from title
+                const description = this.extractDescriptionFromTitle(videoData.title);
+                document.getElementById('currentDescription').textContent = description;
+                
+                // Update stats with live stream info
+                document.getElementById('currentViews').innerHTML = '<i class="fas fa-users"></i> Live Listeners';
+                document.getElementById('currentDuration').innerHTML = '<i class="fas fa-infinity"></i> 24/7 Stream';
+                document.getElementById('streamStatus').innerHTML = '<i class="fas fa-signal"></i> Broadcasting';
+                
+                // Set thumbnail with error handling
+                const thumbnailElement = document.getElementById('currentThumbnail');
+                if (thumbnailElement) {
+                    if (videoData.thumbnail_url) {
+                        thumbnailElement.src = videoData.thumbnail_url;
+                    } else if (currentVideo.videoId) {
+                        thumbnailElement.src = `https://img.youtube.com/vi/${currentVideo.videoId}/mqdefault.jpg`;
+                    } else {
+                        thumbnailElement.src = 'https://pbs.twimg.com/profile_images/1862246538698313730/nQT8JdPJ_400x400.jpg';
+                    }
+                    
+                    // Fallback to phoenix image if thumbnail fails to load
+                    thumbnailElement.onerror = function() {
+                        this.src = 'https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg';
+                    };
+                }
+            }
+
+            // Show fallback info when YouTube API fails but we have Firebase data
+            showFallbackCurrentVideo(currentVideo) {
+                const title = currentVideo.title && currentVideo.title !== currentVideo.videoId 
+                    ? currentVideo.title 
+                    : 'Freedom Phoenix Live Stream';
+                    
+                document.getElementById('currentTitle').textContent = title;
+                document.getElementById('currentChannel').textContent = 'Freedom Phoenix Radio';
+                document.getElementById('currentDescription').textContent = '24/7 Music Stream - Rise from the Ashes';
+                document.getElementById('currentViews').innerHTML = '<i class="fas fa-broadcast-tower"></i> Live';
+                document.getElementById('currentDuration').innerHTML = '<i class="fas fa-infinity"></i> 24/7 Stream';
+                document.getElementById('streamStatus').innerHTML = '<i class="fas fa-signal"></i> Broadcasting';
+                
+                // Set thumbnail with error handling
+                const thumbnailElement = document.getElementById('currentThumbnail');
+                if (thumbnailElement && currentVideo.videoId) {
+                    thumbnailElement.src = `https://img.youtube.com/vi/${currentVideo.videoId}/mqdefault.jpg`;
+                    thumbnailElement.onerror = function() {
+                        this.src = 'https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg';
+                    };
+                }
+            }
+
+            // Show default info when no data is available
+            showDefaultCurrentVideo() {
+                document.getElementById('currentTitle').textContent = 'Freedom Phoenix Live Stream';
+                document.getElementById('currentChannel').textContent = 'Freedom Phoenix Radio';
+                document.getElementById('currentDescription').textContent = '24/7 Music Stream - Rise from the Ashes';
+                document.getElementById('currentViews').innerHTML = '<i class="fas fa-broadcast-tower"></i> Live';
+                document.getElementById('currentDuration').innerHTML = '<i class="fas fa-infinity"></i> 24/7 Stream';
+                document.getElementById('streamStatus').innerHTML = '<i class="fas fa-signal"></i> Broadcasting';
+                
+                // Set default thumbnail
+                const thumbnailElement = document.getElementById('currentThumbnail');
+                if (thumbnailElement) {
+                    thumbnailElement.src = 'https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg';
+                }
+            }
+
+            // Display the stream playlist (what's actually up next in the stream)
+            async displayStreamPlaylist(playlist) {
+                const container = document.getElementById('upNextQueue');
+                console.log('Displaying stream playlist:', playlist);
+                
+                if (!playlist || !playlist.videos || playlist.videos.length === 0) {
+                    container.innerHTML = '<p class="loading">No videos in stream playlist.</p>';
+                    return;
+                }
+
+                const videos = playlist.videos;
+                console.log('Processing', videos.length, 'videos');
+                
+                // Show up to 5 upcoming videos
+                const upNext = videos.slice(0, 5);
+                let html = '';
+
+                // Fetch real titles for each video
+                for (let index = 0; index < upNext.length; index++) {
+                    const video = upNext[index];
+                    console.log('Processing video:', video);
+                    
+                    let songTitle = video.title;
+                    
+                    // If no title or just video ID, fetch from YouTube
+                    if (!songTitle || songTitle === video.videoId || songTitle.length < 3 || songTitle.startsWith('Video ')) {
+                        console.log('Need to fetch title for video ID:', video.videoId);
+                        const videoUrl = `https://www.youtube.com/watch?v=${video.videoId}`;
+                        console.log('Calling getVideoInfoOEmbed for:', videoUrl);
+                        const videoData = await this.getVideoInfoOEmbed(videoUrl);
+                        songTitle = videoData ? videoData.title : `Video ${video.videoId}`;
+                        console.log('Fetched title:', songTitle);
+                    }
+                    
+                    const duration = video.duration || 'Unknown';
+                    
+                    html += `
+                        <div class="up-next-item" onclick="window.open('https://www.youtube.com/watch?v=${video.videoId}', '_blank')">
+                            <div class="queue-position">Up Next #${index + 1}</div>
+                            <div class="queue-song-title">${this.escapeHtml(songTitle)}</div>
+                            <div class="queue-requester">Duration: ${this.escapeHtml(duration)}</div>
+                            <div class="queue-timestamp">Stream Playlist</div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+            }
+
+            // Extract meaningful description from video title
+            extractDescriptionFromTitle(title) {
+                if (!title) return '24/7 Music Stream - Rise from the Ashes';
+                
+                // Common patterns in music stream titles
+                if (title.includes('24/7')) return 'Continuous 24/7 music streaming';
+                if (title.includes('lofi') || title.includes('Lo-Fi')) return 'Relaxing Lo-Fi beats for studying and focus';
+                if (title.includes('chill')) return 'Chill music for relaxation and productivity';
+                if (title.includes('study')) return 'Background music perfect for studying';
+                if (title.includes('sleep')) return 'Peaceful music for sleep and relaxation';
+                if (title.includes('hip hop')) return 'Hip hop beats and rhythms';
+                if (title.includes('jazz')) return 'Smooth jazz for relaxation';
+                if (title.includes('electronic')) return 'Electronic music and beats';
+                
+                // Default description
+                return 'Live music stream from Freedom Phoenix Radio';
+            }
+
+            // Escape HTML to prevent XSS
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize StreamInfo when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            new StreamInfo();
+        });
     </script>
 </body>
 </html>
