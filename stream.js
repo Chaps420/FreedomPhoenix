@@ -400,12 +400,17 @@ class YouTubeStream {
                 console.log('Next video saved to Firebase:', video.title);
             }
 
-            // Also update localStorage as backup
-            if (this.streamManager) {
-                const currentVideo = this.streamManager.setCurrentVideo(video);
-                this.currentVideo = currentVideo;
-                await this.updateVideoInfo();
-            }
+            // Update current video and force title update
+            this.currentVideo = {
+                videoId: video.videoId,
+                title: video.title || 'Unknown Title',
+                startTime: Date.now(),
+                elapsed: 0,
+                state: 'playing'
+            };
+            
+            // Always call updateVideoInfo to ensure real titles are fetched
+            await this.updateVideoInfo();
             
         } catch (error) {
             console.error('Error playing next video:', error);
