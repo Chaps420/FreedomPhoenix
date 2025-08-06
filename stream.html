@@ -481,7 +481,7 @@
 
     <!-- Top Right Phoenix -->
     <div class="top-phoenix">
-        <img src="https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg" alt="Freedom Phoenix Profile" class="top-phoenix-img">
+        <img src="phoenix-new.jpg" alt="Freedom Phoenix Profile" class="top-phoenix-img">
     </div>
 
     <!-- Stream Container -->
@@ -782,7 +782,7 @@
                     
                     // Fallback to phoenix image if thumbnail fails to load
                     thumbnailElement.onerror = function() {
-                        this.src = 'https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg';
+                        this.src = 'phoenix-new.jpg';
                     };
                 }
             }
@@ -805,7 +805,7 @@
                 if (thumbnailElement && currentVideo.videoId) {
                     thumbnailElement.src = `https://img.youtube.com/vi/${currentVideo.videoId}/mqdefault.jpg`;
                     thumbnailElement.onerror = function() {
-                        this.src = 'https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg';
+                        this.src = 'phoenix-new.jpg';
                     };
                 }
             }
@@ -822,7 +822,7 @@
                 // Set default thumbnail
                 const thumbnailElement = document.getElementById('currentThumbnail');
                 if (thumbnailElement) {
-                    thumbnailElement.src = 'https://pbs.twimg.com/profile_images/1941908639545167872/NMW-j9gp_400x400.jpg';
+                    thumbnailElement.src = 'phoenix-new.jpg';
                 }
             }
 
