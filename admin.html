@@ -1242,16 +1242,24 @@
                 // Tab switching (may not exist if tabs aren't used)
                 const queueTab = document.getElementById('queueTab');
                 if (queueTab) {
+                    console.log('Queue tab button found, attaching click listener');
                     queueTab.addEventListener('click', () => {
+                        console.log('Queue tab clicked');
                         this.switchTab('queue');
                     });
+                } else {
+                    console.warn('Queue tab button not found');
                 }
 
                 const streamTab = document.getElementById('streamTab');
                 if (streamTab) {
+                    console.log('Stream tab button found, attaching click listener');
                     streamTab.addEventListener('click', () => {
+                        console.log('Stream tab clicked');
                         this.switchTab('stream');
                     });
+                } else {
+                    console.warn('Stream tab button not found');
                 }
 
                 // Stream management events (may not exist if stream tab isn't shown)
@@ -2149,31 +2157,39 @@
 
             // Stream Management Methods
             switchTab(tab) {
+                console.log('Switching to tab:', tab);
                 const queueTab = document.getElementById('queueTab');
                 const streamTab = document.getElementById('streamTab');
                 const queueSection = document.getElementById('queueSection');
                 const streamSection = document.getElementById('streamSection');
 
+                if (!queueTab || !streamTab || !queueSection || !streamSection) {
+                    console.error('Tab elements not found', {queueTab, streamTab, queueSection, streamSection});
+                    return;
+                }
+
                 if (tab === 'queue') {
                     queueTab.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
                     queueTab.style.color = 'white';
                     queueTab.style.borderBottom = '3px solid #ff6b35';
-                    streamTab.style.background = 'transparent';
+                    streamTab.style.background = 'rgba(255,255,255,0.1)';
                     streamTab.style.color = '#ccc';
                     streamTab.style.borderBottom = 'none';
 
                     queueSection.classList.remove('hidden');
                     streamSection.classList.add('hidden');
+                    console.log('Switched to queue tab');
                 } else {
                     streamTab.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
                     streamTab.style.color = 'white';
                     streamTab.style.borderBottom = '3px solid #ff6b35';
-                    queueTab.style.background = 'transparent';
+                    queueTab.style.background = 'rgba(255,255,255,0.1)';
                     queueTab.style.color = '#ccc';
                     queueTab.style.borderBottom = 'none';
 
                     queueSection.classList.add('hidden');
                     streamSection.classList.remove('hidden');
+                    console.log('Switched to stream tab');
                     
                     this.loadStreamData();
                 }
