@@ -1226,18 +1226,13 @@
             }
 
             bindEvents() {
-                document.getElementById('loginForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.login();
-                });
-
-                document.getElementById('logoutBtn').addEventListener('click', () => {
-                    this.logout();
-                });
-
-                document.getElementById('refreshBtn').addEventListener('click', () => {
-                    this.refreshQueue();
-                });
+                const loginForm = document.getElementById('loginForm');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.login();
+                    });
+                }
 
                 // Tab switching (may not exist if tabs aren't used)
                 const queueTab = document.getElementById('queueTab');
@@ -1521,6 +1516,15 @@
             }
 
             bindQueueControls() {
+                // Bind logout button
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn && !logoutBtn.dataset.bound) {
+                    logoutBtn.addEventListener('click', () => {
+                        this.logout();
+                    });
+                    logoutBtn.dataset.bound = 'true';
+                }
+
                 // Bind tab switching controls
                 const queueTab = document.getElementById('queueTab');
                 if (queueTab && !queueTab.dataset.bound) {
