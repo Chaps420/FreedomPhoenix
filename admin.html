@@ -1365,10 +1365,13 @@
                 }
 
                 // Enhanced table events
-                document.getElementById('sortBy').addEventListener('change', (e) => {
-                    const [field, direction] = e.target.value.split('-');
-                    this.sortQueue(field, direction);
-                });
+                const sortBy = document.getElementById('sortBy');
+                if (sortBy) {
+                    sortBy.addEventListener('change', (e) => {
+                        const [field, direction] = e.target.value.split('-');
+                        this.sortQueue(field, direction);
+                    });
+                }
 
                 // Queue controls (may not exist until after login)
                 const searchQueue = document.getElementById('searchQueue');
