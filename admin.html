@@ -1457,11 +1457,12 @@
                     this.isAuthenticated = true;
                     // Store login session
                     localStorage.setItem('jungleRadioAdminAuth', 'true');
+                    console.log('Login successful, localStorage set to:', localStorage.getItem('jungleRadioAdminAuth'));
                     this.showMessage('Login successful!', 'success');
                     this.showAdminPanel();
                     this.refreshQueue();
                 } else {
-                    this.showMessage('Invalid credentials. Use username: admin, password: phoenix2025', 'error');
+                    this.showMessage('Invalid credentials. Use username: freedom, password: DownUnder420$', 'error');
                 }
             }
 
@@ -1469,6 +1470,7 @@
                 this.isAuthenticated = false;
                 // Clear login session
                 localStorage.removeItem('jungleRadioAdminAuth');
+                console.log('Logged out, localStorage cleared');
                 
                 // Clear intervals
                 if (this.autoRefreshInterval) {
@@ -1485,10 +1487,16 @@
             checkExistingSession() {
                 // Check if user was previously logged in
                 const isLoggedIn = localStorage.getItem('jungleRadioAdminAuth');
+                console.log('Checking existing session, localStorage value:', isLoggedIn);
+                
                 if (isLoggedIn === 'true') {
+                    console.log('Session found, auto-logging in...');
                     this.isAuthenticated = true;
                     this.showAdminPanel();
                     this.refreshQueue();
+                } else {
+                    console.log('No session found, showing login form');
+                    this.showLoginForm();
                 }
             }
 
