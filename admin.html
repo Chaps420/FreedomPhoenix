@@ -1513,6 +1513,27 @@
             }
 
             bindQueueControls() {
+                // Bind tab switching controls
+                const queueTab = document.getElementById('queueTab');
+                if (queueTab && !queueTab.dataset.bound) {
+                    console.log('Binding Queue tab button in bindQueueControls');
+                    queueTab.addEventListener('click', () => {
+                        console.log('Queue tab clicked (from bindQueueControls)');
+                        this.switchTab('queue');
+                    });
+                    queueTab.dataset.bound = 'true';
+                }
+
+                const streamTab = document.getElementById('streamTab');
+                if (streamTab && !streamTab.dataset.bound) {
+                    console.log('Binding Stream tab button in bindQueueControls');
+                    streamTab.addEventListener('click', () => {
+                        console.log('Stream tab clicked (from bindQueueControls)');
+                        this.switchTab('stream');
+                    });
+                    streamTab.dataset.bound = 'true';
+                }
+
                 // Bind controls that only exist after login
                 const searchQueue = document.getElementById('searchQueue');
                 if (searchQueue && !searchQueue.dataset.bound) {
