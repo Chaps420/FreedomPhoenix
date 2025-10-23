@@ -3330,7 +3330,7 @@
                 }
             }
 
-            addFavoriteToStream(favorite) {
+            async addFavoriteToStream(favorite) {
                 try {
                     if (!this.streamManager) {
                         console.warn('Stream manager not initialized');
@@ -3338,28 +3338,40 @@
                     }
 
                     // Extract video ID from YouTube URL
-                    const videoId = this.extractVideoId(favorite.youtubeUrl);
+                    const videoId = this.extractVideoId(favorite.youtubeUrl || favorite.url);
                     
-                    // Create video object for stream
+                    // Try to fetch real video info from YouTube oEmbed API
+                    let videoTitle = favorite.title || 'Unknown Song';
+                    let videoAuthor = 'Unknown';
+                    try {
+                        const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            videoTitle = data.title || videoTitle;
+                            videoAuthor = data.author_name || videoAuthor;
+                        }
+                    } catch (error) {
+                        console.warn('Could not fetch video info from oEmbed:', error);
+                    }
+                    
+                    // Create video object for stream with favorite marking
                     const videoInfo = {
                         videoId: videoId,
-                        title: favorite.title || 'Unknown Song',
+                        title: videoTitle,
                         duration: 'Unknown',
                         addedBy: 'Favorites',
+                        author: videoAuthor,
+                        isFavorite: true,
+                        source: 'favorite',
                         thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
                     };
 
-                    // Add to stream playlist
-                    this.streamManager.addToPlaylist(videoInfo);
-                    console.log('Added favorite to stream playlist:', videoInfo);
+                    // Add to the BEGINNING of the playlist
+                    const currentPlaylist = this.streamManager.getPlaylist();
+                    currentPlaylist.unshift(videoInfo); // Add to beginning
+                    this.streamManager.savePlaylist(currentPlaylist);
                     
-                    // Update playlist display if we're on the stream tab
-                    const streamSection = document.getElementById('streamSection');
-                    if (streamSection && !streamSection.classList.contains('hidden')) {
-                        this.playlist = this.streamManager.getPlaylist();
-                        this.updatePlaylistDisplay();
-                        document.getElementById('playlistCount').textContent = this.playlist.length;
-                    }
+                    console.log('Added favorite to beginning of stream playlist:', videoInfo);
                 } catch (error) {
                     console.error('Error adding favorite to stream:', error);
                 }
