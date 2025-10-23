@@ -255,6 +255,9 @@
                         <button id="playNowBtn" class="btn btn-success" style="padding: 4px 8px; font-size: 8px;">
                             <i class="fas fa-play"></i>
                         </button>
+                        <button id="refreshTitlesBtn" class="btn" style="background: #3498db; color: white; padding: 4px 8px; font-size: 8px;" title="Refresh video titles from YouTube">
+                            <i class="fas fa-sync"></i>
+                        </button>
                         <button id="shufflePlaylistBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
                             <i class="fas fa-random"></i>
                         </button>
@@ -358,6 +361,11 @@
                 }
 
                 // Playlist controls
+                const refreshTitlesBtn = document.getElementById('refreshTitlesBtn');
+                if (refreshTitlesBtn) {
+                    refreshTitlesBtn.addEventListener('click', () => this.forceRefreshTitles());
+                }
+
                 const shufflePlaylistBtn = document.getElementById('shufflePlaylistBtn');
                 if (shufflePlaylistBtn) {
                     shufflePlaylistBtn.addEventListener('click', () => this.shufflePlaylist());
@@ -379,8 +387,81 @@
                 this.updateCurrentVideoDisplay();
 
                 this.playlist = this.streamManager.getPlaylist();
+                
+                // Resolve video titles for existing videos
+                this.resolvePlaylistTitles();
+                
                 this.updatePlaylistDisplay();
                 this.updatePlaylistCount();
+            }
+
+            async resolvePlaylistTitles() {
+                if (!this.playlist || this.playlist.length === 0) return;
+
+                let updated = false;
+                const resolvedPlaylist = [];
+
+                for (const video of this.playlist) {
+                    // Only fetch if title is generic "Video {id}"
+                    if (video.title && video.title.startsWith('Video ') && video.title.length < 30) {
+                        try {
+                            const videoInfo = await this.getVideoInfo(video.videoId);
+                            // Preserve favorite marking and other metadata
+                            resolvedPlaylist.push({
+                                ...video,
+                                title: videoInfo.title,
+                                author: videoInfo.author || video.author
+                            });
+                            updated = true;
+                        } catch (error) {
+                            console.error(`Failed to resolve video ${video.videoId}:`, error);
+                            resolvedPlaylist.push(video);
+                        }
+                    } else {
+                        resolvedPlaylist.push(video);
+                    }
+                }
+
+                if (updated) {
+                    this.playlist = resolvedPlaylist;
+                    this.streamManager.savePlaylist(resolvedPlaylist);
+                    this.updatePlaylistDisplay();
+                }
+            }
+
+            async forceRefreshTitles() {
+                if (!this.playlist || this.playlist.length === 0) {
+                    this.showMessage('Playlist is empty', 'info');
+                    return;
+                }
+
+                this.showMessage('Refreshing video titles...', 'info');
+                const resolvedPlaylist = [];
+
+                for (let i = 0; i < this.playlist.length; i++) {
+                    const video = this.playlist[i];
+                    try {
+                        const videoInfo = await this.getVideoInfo(video.videoId);
+                        resolvedPlaylist.push({
+                            ...video,
+                            title: videoInfo.title,
+                            author: videoInfo.author || video.author
+                        });
+                        
+                        // Update display in real-time
+                        if (i % 10 === 0) {
+                            this.showMessage(`Refreshed ${i + 1}/${this.playlist.length} titles...`, 'info');
+                        }
+                    } catch (error) {
+                        console.error(`Failed to resolve video ${video.videoId}:`, error);
+                        resolvedPlaylist.push(video);
+                    }
+                }
+
+                this.playlist = resolvedPlaylist;
+                this.streamManager.savePlaylist(resolvedPlaylist);
+                this.updatePlaylistDisplay();
+                this.showMessage('All titles refreshed!', 'success');
             }
 
             updateCurrentVideoDisplay() {
