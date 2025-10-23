@@ -811,9 +811,6 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; padding: 2px; flex-shrink: 0;">
                 <h2 style="margin: 0; font-size: 0.85rem;">Queue Management</h2>
                 <div style="display: flex; gap: 2px; align-items: center;">
-                    <button id="queueTab" class="btn btn-primary" style="padding: 2px 6px; font-size: 9px;">
-                        <i class="fas fa-list"></i> Queue
-                    </button>
                     <a href="stream-admin.html" class="btn" style="background: #9b59b6; color: white; padding: 2px 6px; font-size: 9px; text-decoration: none;">
                         <i class="fas fa-broadcast-tower"></i> Live Stream Admin
                     </a>
@@ -962,96 +959,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Stream Management Section -->
-            <div id="streamSection" class="hidden" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
-                <!-- Compact Controls Area -->
-                <div style="flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-bottom: 8px;">
-                    <!-- Stats Row -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 6px; font-size: 8px;">
-                        <div style="flex: 1; background: rgba(52, 152, 219, 0.2); padding: 4px; border-radius: 3px; text-align: center;">
-                            <div style="font-weight: bold; color: #3498db;">Status</div>
-                            <div id="streamStatus" style="color: #ccc; font-size: 9px;">Offline</div>
-                        </div>
-                        <div style="flex: 1; background: rgba(46, 204, 113, 0.2); padding: 4px; border-radius: 3px; text-align: center;">
-                            <div style="font-weight: bold; color: #2ecc71;">Songs</div>
-                            <div style="color: #ccc; font-size: 9px;"><span id="playlistCount">0</span></div>
-                        </div>
-                        <div style="flex: 1; background: rgba(155, 89, 182, 0.2); padding: 4px; border-radius: 3px; text-align: center;">
-                            <div style="font-weight: bold; color: #9b59b6;">Position</div>
-                            <div id="currentPosition" style="color: #ccc; font-size: 9px;">--:--</div>
-                        </div>
-                    </div>
-
-                    <!-- Currently Playing (Compact) -->
-                    <div id="currentVideoDisplay" style="padding: 6px; text-align: center; color: #ccc; font-size: 9px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-bottom: 6px;">
-                        No video playing
-                    </div>
-
-                    <!-- Compact Media Controls -->
-                    <div style="display: flex; gap: 4px; margin-bottom: 6px; justify-content: center;">
-                        <button id="previousBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-step-backward"></i>
-                        </button>
-                        <button id="playBtn" class="btn btn-success" style="padding: 4px 10px; font-size: 8px;">
-                            <i class="fas fa-play"></i> Play
-                        </button>
-                        <button id="pauseBtn" class="btn" style="background: #f39c12; color: white; padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-pause"></i>
-                        </button>
-                        <button id="stopBtn" class="btn btn-danger" style="padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-stop"></i>
-                        </button>
-                        <button id="nextBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-step-forward"></i>
-                        </button>
-                        <button id="restartBtn" class="btn" style="background: #3498db; color: white; padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-redo"></i>
-                        </button>
-                        <button id="shuffleCurrentBtn" class="btn" style="background: #e67e22; color: white; padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-random"></i>
-                        </button>
-                    </div>
-
-                    <!-- Add Video Form (Compact) -->
-                    <div style="display: flex; gap: 4px; align-items: center;">
-                        <input type="text" id="videoUrl" placeholder="YouTube URL or ID" style="flex: 1; padding: 4px; font-size: 8px; border-radius: 3px; border: 1px solid #555; background: rgba(0,0,0,0.3); color: white;">
-                        <button id="addVideoBtn" class="btn btn-primary" style="padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button id="playNowBtn" class="btn btn-success" style="padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <button id="shufflePlaylistBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-random"></i>
-                        </button>
-                        <button id="clearPlaylistBtn" class="btn btn-danger" style="padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        <a href="stream.html" target="_blank" class="btn btn-success" style="padding: 4px 8px; font-size: 8px;">
-                            <i class="fas fa-external-link-alt"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Playlist Management (Takes up remaining space) -->
-                <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: rgba(255, 107, 53, 0.2); flex-shrink: 0;">
-                        <div style="font-weight: bold; color: #ff6b35; font-size: 10px;">
-                            <i class="fas fa-list"></i> Stream Playlist (<span id="playlistCountHeader">0</span> songs)
-                        </div>
-                        <div style="font-size: 8px; color: #999;">
-                            <i class="fas fa-circle" style="color: #2ecc71;"></i> = Playing | 
-                            Use <i class="fas fa-arrow-up"></i><i class="fas fa-arrow-down"></i> to reorder
-                        </div>
-                    </div>
-                    <div id="playlistItems" style="flex: 1; overflow-y: auto; background: rgba(0,0,0,0.3);"></div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Local Stream Manager -->
+    <!-- Stream management is now in separate stream-admin.html page -->
+
     <script src="local-stream.js"></script>
     
     <script type="module">
@@ -1201,133 +1113,12 @@
                     });
                 }
 
-                // Tab switching (may not exist if tabs aren't used)
-                const queueTab = document.getElementById('queueTab');
-                if (queueTab) {
-                    console.log('Queue tab button found, attaching click listener');
-                    queueTab.addEventListener('click', () => {
-                        console.log('Queue tab clicked');
-                        this.switchTab('queue');
-                    });
-                } else {
-                    console.warn('Queue tab button not found');
-                }
-
-                const streamTab = document.getElementById('streamTab');
-                if (streamTab) {
-                    console.log('Stream tab button found, attaching click listener');
-                    streamTab.addEventListener('click', () => {
-                        console.log('Stream tab clicked');
-                        this.switchTab('stream');
-                    });
-                } else {
-                    console.warn('Stream tab button not found');
-                }
-
-                // Stream management events (may not exist if stream tab isn't shown)
-                const addVideoBtn = document.getElementById('addVideoBtn');
-                if (addVideoBtn) {
-                    addVideoBtn.addEventListener('click', () => {
-                        this.addVideoToPlaylist();
-                    });
-                }
-
-                const playNowBtn = document.getElementById('playNowBtn');
-                if (playNowBtn) {
-                    playNowBtn.addEventListener('click', () => {
-                        this.playVideoNow();
-                    });
-                }
-
-                const addPlaylistBtn = document.getElementById('addPlaylistBtn');
-                if (addPlaylistBtn) {
-                    addPlaylistBtn.addEventListener('click', () => {
-                        this.addPlaylistFromUrl();
-                    });
-                }
-
-                const shufflePlaylistBtn = document.getElementById('shufflePlaylistBtn');
-                if (shufflePlaylistBtn) {
-                    shufflePlaylistBtn.addEventListener('click', () => {
-                        this.shufflePlaylist();
-                    });
-                }
-
-                const clearPlaylistBtn = document.getElementById('clearPlaylistBtn');
-                if (clearPlaylistBtn) {
-                    clearPlaylistBtn.addEventListener('click', () => {
-                        this.clearPlaylist();
-                    });
-                }
-
-                const testStreamBtn = document.getElementById('testStreamBtn');
-                if (testStreamBtn) {
-                    testStreamBtn.addEventListener('click', () => {
-                        this.testStream();
-                    });
-                }
-
-                const quickStartBtn = document.getElementById('quickStartBtn');
-                if (quickStartBtn) {
-                    quickStartBtn.addEventListener('click', () => {
-                        this.quickStartDemo();
-                    });
-                }
+                // Stream management is now in separate page (stream-admin.html)
 
                 const clearAllBtn = document.getElementById('clearAllBtn');
                 if (clearAllBtn) {
                     clearAllBtn.addEventListener('click', () => {
                         this.clearAllData();
-                    });
-                }
-
-                // Media control events (may not exist if stream tab isn't shown)
-                const previousBtn = document.getElementById('previousBtn');
-                if (previousBtn) {
-                    previousBtn.addEventListener('click', () => {
-                        this.playPreviousVideo();
-                    });
-                }
-
-                const playBtn = document.getElementById('playBtn');
-                if (playBtn) {
-                    playBtn.addEventListener('click', () => {
-                        this.resumeStream();
-                    });
-                }
-
-                const pauseBtn = document.getElementById('pauseBtn');
-                if (pauseBtn) {
-                    pauseBtn.addEventListener('click', () => {
-                        this.pauseStream();
-                    });
-                }
-
-                const stopBtn = document.getElementById('stopBtn');
-                if (stopBtn) {
-                    stopBtn.addEventListener('click', () => {
-                        this.stopStream();
-                    });
-                }
-
-                const nextBtn = document.getElementById('nextBtn');
-                if (nextBtn) {
-                    nextBtn.addEventListener('click', () => {
-                        this.playNextVideoFromAdmin();
-                    });
-                }
-
-                const restartBtn = document.getElementById('restartBtn');
-                if (restartBtn) {
-                    restartBtn.addEventListener('click', () => {
-                        this.restartCurrentVideo();
-                    });
-                }
-
-                const shuffleCurrentBtn = document.getElementById('shuffleCurrentBtn');
-                if (shuffleCurrentBtn) {
-                    shuffleCurrentBtn.addEventListener('click', () => {
-                        this.playRandomVideo();
                     });
                 }
 
@@ -1493,27 +1284,6 @@
                         this.logout();
                     });
                     logoutBtn.dataset.bound = 'true';
-                }
-
-                // Bind tab switching controls
-                const queueTab = document.getElementById('queueTab');
-                if (queueTab && !queueTab.dataset.bound) {
-                    console.log('Binding Queue tab button in bindQueueControls');
-                    queueTab.addEventListener('click', () => {
-                        console.log('Queue tab clicked (from bindQueueControls)');
-                        this.switchTab('queue');
-                    });
-                    queueTab.dataset.bound = 'true';
-                }
-
-                const streamTab = document.getElementById('streamTab');
-                if (streamTab && !streamTab.dataset.bound) {
-                    console.log('Binding Stream tab button in bindQueueControls');
-                    streamTab.addEventListener('click', () => {
-                        console.log('Stream tab clicked (from bindQueueControls)');
-                        this.switchTab('stream');
-                    });
-                    streamTab.dataset.bound = 'true';
                 }
 
                 // Bind controls that only exist after login
@@ -2158,45 +1928,7 @@
                 }, 5000);
             }
 
-            // Stream Management Methods
-            switchTab(tab) {
-                console.log('Switching to tab:', tab);
-                const queueTab = document.getElementById('queueTab');
-                const streamTab = document.getElementById('streamTab');
-                const queueSection = document.getElementById('queueSection');
-                const streamSection = document.getElementById('streamSection');
-
-                if (!queueTab || !streamTab || !queueSection || !streamSection) {
-                    console.error('Tab elements not found', {queueTab, streamTab, queueSection, streamSection});
-                    return;
-                }
-
-                if (tab === 'queue') {
-                    queueTab.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
-                    queueTab.style.color = 'white';
-                    queueTab.style.borderBottom = '3px solid #ff6b35';
-                    streamTab.style.background = 'rgba(255,255,255,0.1)';
-                    streamTab.style.color = '#ccc';
-                    streamTab.style.borderBottom = 'none';
-
-                    queueSection.classList.remove('hidden');
-                    streamSection.classList.add('hidden');
-                    console.log('Switched to queue tab');
-                } else {
-                    streamTab.style.background = 'linear-gradient(45deg, #ff6b35, #f7931e)';
-                    streamTab.style.color = 'white';
-                    streamTab.style.borderBottom = '3px solid #ff6b35';
-                    queueTab.style.background = 'rgba(255,255,255,0.1)';
-                    queueTab.style.color = '#ccc';
-                    queueTab.style.borderBottom = 'none';
-
-                    queueSection.classList.add('hidden');
-                    streamSection.classList.remove('hidden');
-                    console.log('Switched to stream tab');
-                    
-                    this.loadStreamData();
-                }
-            }
+            // Queue is now always visible - no tab switching needed
 
             async loadStreamData() {
                 if (!this.streamManager) {
