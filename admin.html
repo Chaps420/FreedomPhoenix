@@ -964,126 +964,88 @@
             </div>
 
             <!-- Stream Management Section -->
-            <div id="streamSection" class="hidden">
-                <!-- Stream Stats -->
-                <div class="queue-stats">
-                    <div class="stat-card">
-                        <div class="stat-number" id="streamStatus">Offline</div>
-                        <div>Stream Status</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="playlistCount">0</div>
-                        <div>Videos in Playlist</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="currentPosition">--:--</div>
-                        <div>Current Position</div>
-                    </div>
-                </div>
-
-                <!-- Current Video -->
-                <div class="queue-table" style="margin-bottom: 20px;">
-                    <div class="table-header">
-                        <div colspan="4">Currently Playing</div>
-                    </div>
-                    <div id="currentVideoDisplay" style="padding: 20px; text-align: center; color: #ccc;">
-                        No video currently playing
-                    </div>
-                </div>
-
-                <!-- Media Controls -->
-                <div class="queue-table" style="margin-bottom: 20px;">
-                    <div class="table-header">
-                        <div>Stream Controls</div>
-                    </div>
-                    <div style="padding: 20px; text-align: center;">
-                        <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 15px;">
-                            <button id="previousBtn" class="btn" style="background: #9b59b6; color: white; padding: 12px 20px;">
-                                <i class="fas fa-step-backward"></i> Previous
-                            </button>
-                            <button id="playBtn" class="btn btn-success" style="padding: 12px 20px;">
-                                <i class="fas fa-play"></i> Play
-                            </button>
-                            <button id="pauseBtn" class="btn" style="background: #f39c12; color: white; padding: 12px 20px;">
-                                <i class="fas fa-pause"></i> Pause
-                            </button>
-                            <button id="stopBtn" class="btn btn-danger" style="padding: 12px 20px;">
-                                <i class="fas fa-stop"></i> Stop
-                            </button>
-                            <button id="nextBtn" class="btn" style="background: #9b59b6; color: white; padding: 12px 20px;">
-                                <i class="fas fa-step-forward"></i> Next
-                            </button>
+            <div id="streamSection" class="hidden" style="display: flex; flex-direction: column; height: 100%; overflow: hidden;">
+                <!-- Compact Controls Area -->
+                <div style="flex-shrink: 0; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+                    <!-- Stats Row -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 6px; font-size: 8px;">
+                        <div style="flex: 1; background: rgba(52, 152, 219, 0.2); padding: 4px; border-radius: 3px; text-align: center;">
+                            <div style="font-weight: bold; color: #3498db;">Status</div>
+                            <div id="streamStatus" style="color: #ccc; font-size: 9px;">Offline</div>
                         </div>
-                        <div style="display: flex; gap: 10px; justify-content: center;">
-                            <button id="restartBtn" class="btn" style="background: #3498db; color: white;">
-                                <i class="fas fa-redo"></i> Restart Current
-                            </button>
-                            <button id="shuffleCurrentBtn" class="btn" style="background: #e67e22; color: white;">
-                                <i class="fas fa-random"></i> Play Random
-                            </button>
+                        <div style="flex: 1; background: rgba(46, 204, 113, 0.2); padding: 4px; border-radius: 3px; text-align: center;">
+                            <div style="font-weight: bold; color: #2ecc71;">Songs</div>
+                            <div style="color: #ccc; font-size: 9px;"><span id="playlistCount">0</span></div>
+                        </div>
+                        <div style="flex: 1; background: rgba(155, 89, 182, 0.2); padding: 4px; border-radius: 3px; text-align: center;">
+                            <div style="font-weight: bold; color: #9b59b6;">Position</div>
+                            <div id="currentPosition" style="color: #ccc; font-size: 9px;">--:--</div>
                         </div>
                     </div>
+
+                    <!-- Currently Playing (Compact) -->
+                    <div id="currentVideoDisplay" style="padding: 6px; text-align: center; color: #ccc; font-size: 9px; background: rgba(255,255,255,0.05); border-radius: 3px; margin-bottom: 6px;">
+                        No video playing
+                    </div>
+
+                    <!-- Compact Media Controls -->
+                    <div style="display: flex; gap: 4px; margin-bottom: 6px; justify-content: center;">
+                        <button id="previousBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-step-backward"></i>
+                        </button>
+                        <button id="playBtn" class="btn btn-success" style="padding: 4px 10px; font-size: 8px;">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button id="pauseBtn" class="btn" style="background: #f39c12; color: white; padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger" style="padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button id="nextBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-step-forward"></i>
+                        </button>
+                        <button id="restartBtn" class="btn" style="background: #3498db; color: white; padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button id="shuffleCurrentBtn" class="btn" style="background: #e67e22; color: white; padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-random"></i>
+                        </button>
+                    </div>
+
+                    <!-- Add Video Form (Compact) -->
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <input type="text" id="videoUrl" placeholder="YouTube URL or ID" style="flex: 1; padding: 4px; font-size: 8px; border-radius: 3px; border: 1px solid #555; background: rgba(0,0,0,0.3); color: white;">
+                        <button id="addVideoBtn" class="btn btn-primary" style="padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button id="playNowBtn" class="btn btn-success" style="padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button id="shufflePlaylistBtn" class="btn" style="background: #9b59b6; color: white; padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-random"></i>
+                        </button>
+                        <button id="clearPlaylistBtn" class="btn btn-danger" style="padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <a href="stream.html" target="_blank" class="btn btn-success" style="padding: 4px 8px; font-size: 8px;">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Add Video Form -->
-                <div class="queue-table" style="margin-bottom: 20px;">
-                    <div class="table-header">
-                        <div>Add Video to Stream</div>
-                    </div>
-                    <div style="padding: 20px;">
-                        <div class="form-group">
-                            <label for="videoUrl">YouTube Video URL or ID:</label>
-                            <input type="text" id="videoUrl" placeholder="https://www.youtube.com/watch?v=... or just the video ID" style="margin-bottom: 10px;">
+                <!-- Playlist Management (Takes up remaining space) -->
+                <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; background: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; background: rgba(255, 107, 53, 0.2); flex-shrink: 0;">
+                        <div style="font-weight: bold; color: #ff6b35; font-size: 10px;">
+                            <i class="fas fa-list"></i> Stream Playlist (<span id="playlistCountHeader">0</span> songs)
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <button id="addVideoBtn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Add Video
-                            </button>
-                            <button id="playNowBtn" class="btn btn-success">
-                                <i class="fas fa-play"></i> Play Now
-                            </button>
-                            <button id="addPlaylistBtn" class="btn" style="background: #8e44ad; color: white;">
-                                <i class="fas fa-list"></i> Add Playlist
-                            </button>
-                            <button id="quickStartBtn" class="btn" style="background: #f39c12; color: white;">
-                                <i class="fas fa-rocket"></i> Quick Start Demo
-                            </button>
+                        <div style="font-size: 8px; color: #999;">
+                            <i class="fas fa-circle" style="color: #2ecc71;"></i> = Playing | 
+                            Use <i class="fas fa-arrow-up"></i><i class="fas fa-arrow-down"></i> to reorder
                         </div>
                     </div>
-                </div>
-
-                <!-- Playlist Management -->
-                <div class="queue-table">
-                    <div class="table-header" style="font-size: 10px;">
-                        <div style="text-align: center;">#</div>
-                        <div>Video Title / Info</div>
-                        <div style="text-align: center;">Duration</div>
-                        <div style="text-align: center;">Actions</div>
-                    </div>
-                    <div id="playlistItems" style="max-height: 600px; overflow-y: auto; background: rgba(0,0,0,0.3);"></div>
-                </div>
-                <div style="text-align: center; margin: 10px 0; color: #999; font-size: 9px;">
-                    <i class="fas fa-info-circle"></i> Total Songs: <span id="playlistCount">0</span> | 
-                    Green highlight = Currently Playing | 
-                    Click arrows to reorder
-                </div>
-
-                <div style="text-align: center; margin-top: 20px;">
-                    <button id="shufflePlaylistBtn" class="btn" style="background: #9b59b6; color: white;">
-                        <i class="fas fa-random"></i> Shuffle Playlist
-                    </button>
-                    <button id="clearPlaylistBtn" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Clear Playlist
-                    </button>
-                    <button id="testStreamBtn" class="btn" style="background: #3498db; color: white;">
-                        <i class="fas fa-vial"></i> Test Stream
-                    </button>
-                    <button id="clearAllBtn" class="btn" style="background: #e74c3c; color: white;">
-                        <i class="fas fa-broom"></i> Clear All
-                    </button>
-                    <a href="stream.html" target="_blank" class="btn btn-success">
-                        <i class="fas fa-external-link-alt"></i> View Stream
-                    </a>
+                    <div id="playlistItems" style="flex: 1; overflow-y: auto; background: rgba(0,0,0,0.3);"></div>
                 </div>
             </div>
         </div>
@@ -2389,6 +2351,17 @@
                     `;
                     container.appendChild(item);
                 });
+                
+                // Update both playlist count displays
+                this.updatePlaylistCount();
+            }
+
+            updatePlaylistCount() {
+                const count = this.playlist ? this.playlist.length : 0;
+                const countElement = document.getElementById('playlistCount');
+                const countHeaderElement = document.getElementById('playlistCountHeader');
+                if (countElement) countElement.textContent = count;
+                if (countHeaderElement) countHeaderElement.textContent = count;
             }
 
             extractVideoId(url) {
