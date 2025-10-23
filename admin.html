@@ -1054,13 +1054,18 @@
 
                 <!-- Playlist Management -->
                 <div class="queue-table">
-                    <div class="table-header">
-                        <div>#</div>
-                        <div>Video Title</div>
-                        <div>Duration</div>
-                        <div>Actions</div>
+                    <div class="table-header" style="font-size: 10px;">
+                        <div style="text-align: center;">#</div>
+                        <div>Video Title / Info</div>
+                        <div style="text-align: center;">Duration</div>
+                        <div style="text-align: center;">Actions</div>
                     </div>
-                    <div id="playlistItems" style="max-height: 400px; overflow-y: auto;"></div>
+                    <div id="playlistItems" style="max-height: 600px; overflow-y: auto; background: rgba(0,0,0,0.3);"></div>
+                </div>
+                <div style="text-align: center; margin: 10px 0; color: #999; font-size: 9px;">
+                    <i class="fas fa-info-circle"></i> Total Songs: <span id="playlistCount">0</span> | 
+                    Green highlight = Currently Playing | 
+                    Click arrows to reorder
                 </div>
 
                 <div style="text-align: center; margin-top: 20px;">
@@ -2338,28 +2343,47 @@
                 container.innerHTML = '';
 
                 if (this.playlist.length === 0) {
-                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #ccc;">No videos in playlist</div>';
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #ccc; font-size: 9px;">No videos in playlist</div>';
                     return;
                 }
 
                 this.playlist.forEach((video, index) => {
                     const item = document.createElement('div');
-                    item.className = 'queue-item';
+                    item.className = 'stream-playlist-item';
+                    item.style.cssText = 'display: grid; grid-template-columns: 35px 1fr 80px 160px; gap: 8px; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); align-items: center; font-size: 9px;';
+                    
+                    // Highlight currently playing video
+                    if (this.currentVideo && this.currentVideo.videoId === video.videoId) {
+                        item.style.background = 'rgba(46, 204, 113, 0.15)';
+                        item.style.borderLeft = '3px solid #2ecc71';
+                    }
+                    
                     item.innerHTML = `
-                        <div>${index + 1}</div>
-                        <div class="song-info">
-                            <div class="song-title">${this.escapeHtml(video.title)}</div>
-                            <a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" class="youtube-link">
-                                <i class="fas fa-external-link-alt"></i> View on YouTube
-                            </a>
+                        <div style="text-align: center; font-weight: bold; color: #ff6b35; font-size: 10px;">${index + 1}</div>
+                        <div style="min-width: 0;">
+                            <div style="font-weight: bold; color: #ff6b35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px;" title="${this.escapeHtml(video.title)}">
+                                ${this.escapeHtml(video.title)}
+                            </div>
+                            <div style="font-size: 8px; color: #999; margin-top: 2px;">
+                                <a href="https://www.youtube.com/watch?v=${video.videoId}" target="_blank" style="color: #3498db; text-decoration: none;">
+                                    <i class="fas fa-external-link-alt"></i> ${video.videoId}
+                                </a>
+                                ${video.addedBy ? ` • Added by: ${this.escapeHtml(video.addedBy)}` : ''}
+                            </div>
                         </div>
-                        <div>${video.duration || 'Unknown'}</div>
-                        <div class="actions">
-                            <button class="btn btn-success" onclick="adminPanel.playVideoAtIndex(${index})">
-                                <i class="fas fa-play"></i> Play
+                        <div style="text-align: center; color: #ccc; font-size: 9px;">${video.duration || 'Unknown'}</div>
+                        <div style="display: flex; gap: 3px; justify-content: center;">
+                            <button class="btn btn-success" onclick="adminPanel.playVideoAtIndex(${index})" style="padding: 3px 6px; font-size: 8px;" title="Play Now">
+                                <i class="fas fa-play"></i>
                             </button>
-                            <button class="btn btn-danger" onclick="adminPanel.removeVideoFromPlaylist(${index})">
-                                <i class="fas fa-trash"></i> Remove
+                            <button class="btn" style="background: #3498db; color: white; padding: 3px 6px; font-size: 8px;" onclick="adminPanel.moveVideoUp(${index})" ${index === 0 ? 'disabled' : ''} title="Move Up">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <button class="btn" style="background: #3498db; color: white; padding: 3px 6px; font-size: 8px;" onclick="adminPanel.moveVideoDown(${index})" ${index === this.playlist.length - 1 ? 'disabled' : ''} title="Move Down">
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="adminPanel.removeVideoFromPlaylist(${index})" style="padding: 3px 6px; font-size: 8px;" title="Remove">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     `;
@@ -2488,6 +2512,32 @@
                 await this.savePlaylistToFirebase();
                 
                 this.showMessage('Video removed from playlist', 'success');
+            }
+
+            async moveVideoUp(index) {
+                if (index <= 0 || index >= this.playlist.length) return;
+                
+                if (this.streamManager) {
+                    const playlist = this.streamManager.getPlaylist();
+                    [playlist[index - 1], playlist[index]] = [playlist[index], playlist[index - 1]];
+                    this.streamManager.savePlaylist(playlist);
+                    this.playlist = playlist;
+                    this.updatePlaylistDisplay();
+                    await this.savePlaylistToFirebase();
+                }
+            }
+
+            async moveVideoDown(index) {
+                if (index < 0 || index >= this.playlist.length - 1) return;
+                
+                if (this.streamManager) {
+                    const playlist = this.streamManager.getPlaylist();
+                    [playlist[index], playlist[index + 1]] = [playlist[index + 1], playlist[index]];
+                    this.streamManager.savePlaylist(playlist);
+                    this.playlist = playlist;
+                    this.updatePlaylistDisplay();
+                    await this.savePlaylistToFirebase();
+                }
             }
 
             async shufflePlaylist() {
@@ -3556,12 +3606,15 @@
                         console.log('Favorites after add:', favorites);
                         console.log('Calling renderFavorites()...');
                         
+                        // AUTO-ADD TO LIVE STREAM PLAYLIST
+                        this.addFavoriteToStream(newFavorite);
+                        
                         // Remove from queue after adding to favorites
                         await this.remove(this.ref(this.database, `songs/${requestId}`));
                         
                         this.renderFavorites();
                         this.updateStats();
-                        this.showMessage('Added to favorites and removed from queue!', 'success');
+                        this.showMessage('Added to favorites and live stream!', 'success');
                     } else {
                         console.log('Song already in favorites');
                         this.showMessage('Already in favorites', 'info');
@@ -3569,6 +3622,41 @@
                 } catch (error) {
                     console.error('Error adding to favorites:', error);
                     this.showMessage('Error adding to favorites: ' + error.message, 'error');
+                }
+            }
+
+            addFavoriteToStream(favorite) {
+                try {
+                    if (!this.streamManager) {
+                        console.warn('Stream manager not initialized');
+                        return;
+                    }
+
+                    // Extract video ID from YouTube URL
+                    const videoId = this.extractVideoId(favorite.youtubeUrl);
+                    
+                    // Create video object for stream
+                    const videoInfo = {
+                        videoId: videoId,
+                        title: favorite.title || 'Unknown Song',
+                        duration: 'Unknown',
+                        addedBy: 'Favorites',
+                        thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+                    };
+
+                    // Add to stream playlist
+                    this.streamManager.addToPlaylist(videoInfo);
+                    console.log('Added favorite to stream playlist:', videoInfo);
+                    
+                    // Update playlist display if we're on the stream tab
+                    const streamSection = document.getElementById('streamSection');
+                    if (streamSection && !streamSection.classList.contains('hidden')) {
+                        this.playlist = this.streamManager.getPlaylist();
+                        this.updatePlaylistDisplay();
+                        document.getElementById('playlistCount').textContent = this.playlist.length;
+                    }
+                } catch (error) {
+                    console.error('Error adding favorite to stream:', error);
                 }
             }
         }
